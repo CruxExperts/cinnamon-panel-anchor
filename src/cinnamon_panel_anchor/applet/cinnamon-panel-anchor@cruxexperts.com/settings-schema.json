@@ -1,4 +1,13 @@
 {
+  "section-status": {
+    "type": "section",
+    "description": "Status and notifications"
+  },
+  "show-notifications": {
+    "type": "switch",
+    "default": true,
+    "description": "Show attention notifications"
+  },
   "refresh-interval": {
     "type": "spinbutton",
     "default": 30,
@@ -8,9 +17,27 @@
     "description": "Refresh interval",
     "units": "seconds"
   },
-  "show-notifications": {
-    "type": "checkbox",
+  "restore-automatically": {
+    "type": "switch",
+    "default": false,
+    "description": "Restore automatically when drift is detected"
+  },
+  "section-startup": {
+    "type": "section",
+    "description": "Startup"
+  },
+  "legacy-autostart-watcher": {
+    "type": "switch",
+    "default": false,
+    "description": "Run legacy autostart watcher at login"
+  },
+  "section-debug": {
+    "type": "section",
+    "description": "Diagnostics"
+  },
+  "debug-logging": {
+    "type": "switch",
     "default": true,
-    "description": "Show attention notifications"
+    "description": "Debug logging"
   }
 }

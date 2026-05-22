@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+uv run python tools/version_sync.py --check
+uv run python tools/validate.py
+git diff --check

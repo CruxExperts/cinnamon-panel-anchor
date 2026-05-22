@@ -64,12 +64,39 @@ def test_uuid_consistency_in_release_files():
 
 
 def test_versions_are_consistent():
+    version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     metadata = json.loads((ROOT / "src" / "cinnamon_panel_anchor" / "applet" / UUID / "metadata.json").read_text(encoding="utf-8"))
     info = json.loads((ROOT / UUID / "info.json").read_text(encoding="utf-8"))
 
+    assert version == "0.2.1"
+    assert (ROOT / "src" / "cinnamon_panel_anchor" / "_version.txt").read_text(encoding="utf-8").strip() == version
+    assert metadata["version"] == version
+    for path in (
+        ROOT / "src" / "cinnamon_panel_anchor" / "applet" / UUID / "applet.js",
+        ROOT / UUID / "files" / UUID / "applet.js",
+    ):
+        assert f'const VERSION = "{version}";' in path.read_text(encoding="utf-8")
     assert f'version = "{metadata["version"]}"' in pyproject
     assert info["version"] == metadata["version"]
+
+
+def test_public_identity_and_release_docs_exist():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    for text in ("Crux Experts LLC", "Slavic Kozyuk", "https://github.com/CruxExperts", "https://www.cruxexperts.com"):
+        assert text in readme
+    for relative in (
+        "SECURITY.md",
+        "CONTRIBUTING.md",
+        "docs/VERSIONING.md",
+        "docs/PUBLISHING_CHECKLIST.md",
+        ".github/workflows/ci.yml",
+        ".github/dependabot.yml",
+        ".github/pull_request_template.md",
+        ".github/ISSUE_TEMPLATE/bug_report.md",
+        ".github/ISSUE_TEMPLATE/feature_request.md",
+    ):
+        assert (ROOT / relative).exists()
 
 
 def test_applet_metadata_does_not_claim_reserved_launcher_role():
@@ -100,6 +127,28 @@ def test_checked_in_spices_files_match_packaged_applet_assets():
 def test_applet_declares_vertical_panel_support():
     applet = (ROOT / "src" / "cinnamon_panel_anchor" / "applet" / UUID / "applet.js").read_text(encoding="utf-8")
     assert "setAllowedLayout(Applet.AllowedLayout.BOTH)" in applet
+
+
+def test_applet_lifecycle_and_settings_controls_are_declared():
+    applet = (ROOT / "src" / "cinnamon_panel_anchor" / "applet" / UUID / "applet.js").read_text(encoding="utf-8")
+    schema = json.loads((ROOT / "src" / "cinnamon_panel_anchor" / "applet" / UUID / "settings-schema.json").read_text(encoding="utf-8"))
+
+    for text in (
+        "getRunningInstancesForUuid",
+        "_pruneDuplicateActors",
+        "_logAppletEvent",
+        "action-skipped-in-flight",
+        "Quit for Session",
+        "Disable Applet",
+        "disable-applet",
+        "autostart-status",
+        "Version \" + VERSION",
+    ):
+        assert text in applet
+    assert schema["show-notifications"]["type"] == "switch"
+    assert schema["restore-automatically"]["type"] == "switch"
+    assert schema["legacy-autostart-watcher"]["default"] is False
+    assert schema["debug-logging"]["default"] is True
 
 
 def test_source_never_sets_xrandr_primary():

@@ -29,9 +29,10 @@ def test_status_json_uses_standard_contract(monkeypatch, capsys):
     payload = _json_output(capsys)
 
     assert result == 0
-    assert {"ok", "severity", "summary", "monitors", "panels", "anchors", "pending_decision", "plan", "messages", "error"} <= set(payload)
+    assert {"ok", "severity", "summary", "monitors", "panels", "anchors", "pending_decision", "plan", "messages", "error", "error_details", "version", "log_path"} <= set(payload)
     assert payload["ok"] is True
     assert payload["plan"]["desired_panels"] == ["1:0:bottom"]
+    assert payload["version"] == "0.2.1"
 
 
 def test_capture_json_saves_anchors_and_state(monkeypatch, capsys):

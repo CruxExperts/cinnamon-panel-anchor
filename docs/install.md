@@ -32,10 +32,24 @@ The install command also writes `cinnamon-panel-anchor-backend` into that direct
 Enable and disable commands are also available:
 
 ```bash
-uv run cinnamon-panel-anchor enable-applet
-uv run cinnamon-panel-anchor disable-applet
-uv run cinnamon-panel-anchor uninstall-applet
+uv run cinnamon-panel-anchor enable-applet --json
+uv run cinnamon-panel-anchor disable-applet --json
+uv run cinnamon-panel-anchor uninstall-applet --json
 ```
+
+The applet starts with Cinnamon because Cinnamon stores it in `enabled-applets`. Do not install the legacy XDG autostart watcher for normal applet startup.
+
+## Optional Legacy Autostart Watcher
+
+The legacy watcher remains available for compatibility and migration testing:
+
+```bash
+uv run cinnamon-panel-anchor autostart-status --json
+uv run cinnamon-panel-anchor install-autostart --json
+uv run cinnamon-panel-anchor uninstall-autostart --json
+```
+
+It is off by default. The applet settings switch named **Run legacy autostart watcher at login** creates or removes the desktop autostart file.
 
 Restart Cinnamon if the applet list does not refresh:
 

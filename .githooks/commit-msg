@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+msg="$(sed -n '1p' "$1")"
+case "$msg" in
+  feat:\ *|fix:\ *|docs:\ *|test:\ *|chore:\ *|refactor:\ *|ci:\ *) exit 0 ;;
+esac
+echo "commit message must use a Conventional Commit prefix" >&2
+exit 1

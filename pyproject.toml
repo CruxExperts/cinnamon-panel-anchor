@@ -1,11 +1,11 @@
 [project]
 name = "cinnamon-panel-anchor"
-version = "0.2.0"
+version = "0.2.1"
 description = "Native Cinnamon applet and Python backend that keep panel placement anchored to monitor connectors on X11."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "cinnamon-panel-anchor contributors" }]
+authors = [{ name = "Slavic Kozyuk" }]
 keywords = ["cinnamon", "linux-mint", "x11", "xrandr", "panel"]
 classifiers = [
     "Development Status :: 3 - Alpha",

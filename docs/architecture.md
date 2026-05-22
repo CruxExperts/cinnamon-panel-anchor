@@ -18,13 +18,36 @@ cinnamon-panel-anchor capture --json
 cinnamon-panel-anchor restore --json
 cinnamon-panel-anchor restore --json --dry-run
 cinnamon-panel-anchor diagnose --json
+cinnamon-panel-anchor autostart-status --json
+cinnamon-panel-anchor install-autostart --json
+cinnamon-panel-anchor uninstall-autostart --json
+cinnamon-panel-anchor disable-applet --json
+cinnamon-panel-anchor log-event --json --event applet-action
 ```
 
 All applet-facing JSON results use these top-level keys:
 
 ```text
-ok, severity, summary, monitors, panels, anchors, pending_decision, plan, messages, error
+ok, severity, summary, monitors, panels, anchors, pending_decision, plan, messages, error, error_details, version, log_path
 ```
+
+Mutating commands are serialized with a process-safe lock. Lock refusal exits with code `3`; JSON mode returns `ok: false`, `severity: "warning"`, and lock metadata in `error_details`.
+
+Read-only commands such as `status`, `diagnose`, `autostart-status`, `export-spice`, and `log-event` do not take the mutating lock.
+
+## Logging
+
+Structured local diagnostics are written as JSONL to:
+
+```text
+$XDG_STATE_HOME/cinnamon-panel-anchor/debug.jsonl
+```
+
+The backend retains the latest 1000 records. Records include UTC timestamp, level, component, event, version, command/action, outcome, message, context, and exception details when present.
+
+## Startup
+
+Cinnamon's `enabled-applets` setting is the normal session/startup mechanism. The legacy XDG autostart watcher is optional, off by default, and controlled by `install-autostart`, `uninstall-autostart`, or the applet setting named **Run legacy autostart watcher at login**.
 
 ## Cinnamon Panel Setting
 

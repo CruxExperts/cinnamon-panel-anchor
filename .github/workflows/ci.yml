@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv run python tools/version_sync.py --check
+      - run: uv run python tools/validate.py
+      - run: uv run pytest
+      - run: git diff --check

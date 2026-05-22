@@ -9,6 +9,7 @@ from importlib import resources
 from pathlib import Path
 
 from .settings import CinnamonSettings, CinnamonSettingsError
+from .version import get_version
 
 
 APPLET_UUID = "cinnamon-panel-anchor@cruxexperts.com"
@@ -123,6 +124,8 @@ def export_spice(output_dir: Path) -> Path:
     files_root.mkdir(parents=True)
     _copy_resource_tree(applet_resource_root(), files_root)
     metadata = json.loads((files_root / "metadata.json").read_text(encoding="utf-8"))
+    metadata["version"] = get_version()
+    (files_root / "metadata.json").write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (root / "info.json").write_text(
         json.dumps(
             {
@@ -130,7 +133,7 @@ def export_spice(output_dir: Path) -> Path:
                 "name": metadata["name"],
                 "description": metadata["description"],
                 "version": metadata["version"],
-                "author": "Crux Experts",
+                "author": "Crux Experts LLC",
             },
             indent=2,
             sort_keys=True,

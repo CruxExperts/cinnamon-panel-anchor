@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+from . import __version__
 from .applet_manager import (
     APPLET_UUID,
     disable_applet,
@@ -17,6 +18,8 @@ from .applet_manager import (
     uninstall_applet,
 )
 from .autostart import autostart_path, install_autostart, uninstall_autostart
+from .locking import CommandLock, LockRefused
+from .logging import error_details, log_path, write_log
 from .planner import (
     capture_anchors,
     format_panels,
@@ -54,6 +57,7 @@ def _standard_payload(
     plan: dict[str, Any] | None = None,
     messages: list[str] | None = None,
     error: str | None = None,
+    error_details: dict[str, Any] | None = None,
     **extra: Any,
 ) -> dict[str, Any]:
     payload = {
@@ -67,6 +71,9 @@ def _standard_payload(
         "plan": plan,
         "messages": messages or [],
         "error": error,
+        "error_details": error_details,
+        "version": __version__,
+        "log_path": str(log_path()),
     }
     payload.update(extra)
     return payload
@@ -75,7 +82,15 @@ def _standard_payload(
 def _settings() -> CinnamonSettings | None:
     try:
         return CinnamonSettings()
-    except CinnamonSettingsError:
+    except CinnamonSettingsError as exc:
+        write_log(
+            level="warning",
+            component="backend",
+            event="settings-unavailable",
+            outcome="failed",
+            message=str(exc),
+            exception=exc,
+        )
         return None
 
 
@@ -397,14 +412,63 @@ def cmd_watch(args: argparse.Namespace) -> int:
         time.sleep(args.interval)
 
 
-def cmd_install_autostart(_: argparse.Namespace) -> int:
+def _autostart_payload() -> dict[str, Any]:
+    path = autostart_path()
+    return _standard_payload(
+        ok=True,
+        severity="info",
+        summary="Legacy autostart watcher status collected",
+        messages=[f"legacy autostart watcher is {'installed' if path.exists() else 'not installed'}"],
+        error=None,
+        installed=path.exists(),
+        autostart_path=str(path),
+    )
+
+
+def cmd_autostart_status(args: argparse.Namespace) -> int:
+    payload = _autostart_payload()
+    if args.json:
+        _json(payload)
+    else:
+        print(f"{'installed' if payload['installed'] else 'not installed'}: {payload['autostart_path']}")
+    return 0
+
+
+def cmd_install_autostart(args: argparse.Namespace) -> int:
     path = install_autostart()
+    if args.json:
+        _json(
+            _standard_payload(
+                ok=True,
+                severity="info",
+                summary="Legacy autostart watcher installed",
+                messages=[f"installed {path}"],
+                error=None,
+                installed=True,
+                autostart_path=str(path),
+            )
+        )
+        return 0
     print(f"installed {path}")
     return 0
 
 
-def cmd_uninstall_autostart(_: argparse.Namespace) -> int:
+def cmd_uninstall_autostart(args: argparse.Namespace) -> int:
     removed = uninstall_autostart()
+    if args.json:
+        _json(
+            _standard_payload(
+                ok=True,
+                severity="info",
+                summary="Legacy autostart watcher removed" if removed else "Legacy autostart watcher was not installed",
+                messages=[f"removed {autostart_path()}" if removed else f"not installed: {autostart_path()}"],
+                error=None,
+                installed=False,
+                removed=removed,
+                autostart_path=str(autostart_path()),
+            )
+        )
+        return 0
     print(f"removed {autostart_path()}" if removed else f"not installed: {autostart_path()}")
     return 0
 
@@ -450,37 +514,130 @@ def cmd_install_applet(args: argparse.Namespace) -> int:
         try:
             enabled = enable_applet()
         except CinnamonSettingsError as exc:
+            if args.json:
+                _json(
+                    _standard_payload(
+                        ok=False,
+                        severity="error",
+                        summary="Applet files installed but Cinnamon enable failed",
+                        messages=[f"installed {APPLET_UUID} to {path}"],
+                        error=str(exc),
+                        error_details=error_details(exc),
+                        applet_path=str(path),
+                        enabled=False,
+                    )
+                )
+                return 2
             print(f"installed {APPLET_UUID} to {path}")
             print(str(exc), file=sys.stderr)
             return 2
+    if args.json:
+        _json(
+            _standard_payload(
+                ok=True,
+                severity="info",
+                summary="Applet installed",
+                messages=[f"installed {APPLET_UUID} to {path}", "enabled applet" if enabled else "applet not enabled"],
+                error=None,
+                applet_path=str(path),
+                enabled=enabled,
+            )
+        )
+        return 0
     print(f"installed {APPLET_UUID} to {path}")
     if enabled:
         print("enabled applet")
     return 0
 
 
-def cmd_enable_applet(_: argparse.Namespace) -> int:
+def _emit_enable_applet_json(changed: bool) -> None:
+    _json(
+        _standard_payload(
+            ok=True,
+            severity="info",
+            summary="Applet enabled" if changed else "Applet already enabled",
+            messages=["enabled applet" if changed else "applet already enabled"],
+            error=None,
+            enabled=True,
+            changed=changed,
+        )
+    )
+
+
+def cmd_enable_applet(args: argparse.Namespace) -> int:
     try:
         changed = enable_applet()
     except CinnamonSettingsError as exc:
+        if args.json:
+            _json(
+                _standard_payload(
+                    ok=False,
+                    severity="error",
+                    summary="Unable to enable applet",
+                    error=str(exc),
+                    error_details=error_details(exc),
+                )
+            )
+            return 2
         print(str(exc), file=sys.stderr)
         return 2
+    if args.json:
+        _emit_enable_applet_json(changed)
+        return 0
     print("enabled applet" if changed else "applet already enabled")
     return 0
 
 
-def cmd_disable_applet(_: argparse.Namespace) -> int:
+def cmd_disable_applet(args: argparse.Namespace) -> int:
     try:
         changed = disable_applet()
     except CinnamonSettingsError as exc:
+        if args.json:
+            _json(
+                _standard_payload(
+                    ok=False,
+                    severity="error",
+                    summary="Unable to disable applet",
+                    error=str(exc),
+                    error_details=error_details(exc),
+                    enabled=True,
+                )
+            )
+            return 2
         print(str(exc), file=sys.stderr)
         return 2
+    if args.json:
+        _json(
+            _standard_payload(
+                ok=True,
+                severity="info",
+                summary="Applet disabled" if changed else "Applet was not enabled",
+                messages=["disabled applet" if changed else "applet was not enabled"],
+                error=None,
+                enabled=False,
+                changed=changed,
+            )
+        )
+        return 0
     print("disabled applet" if changed else "applet was not enabled")
     return 0
 
 
-def cmd_uninstall_applet(_: argparse.Namespace) -> int:
+def cmd_uninstall_applet(args: argparse.Namespace) -> int:
     removed = uninstall_applet()
+    if args.json:
+        _json(
+            _standard_payload(
+                ok=True,
+                severity="info",
+                summary="Applet files removed" if removed else "Applet files were not installed",
+                messages=[f"removed {installed_applet_path()}" if removed else f"not installed: {installed_applet_path()}"],
+                error=None,
+                removed=removed,
+                applet_path=str(installed_applet_path()),
+            )
+        )
+        return 0
     print(f"removed {installed_applet_path()}" if removed else f"not installed: {installed_applet_path()}")
     return 0
 
@@ -488,6 +645,47 @@ def cmd_uninstall_applet(_: argparse.Namespace) -> int:
 def cmd_export_spice(args: argparse.Namespace) -> int:
     path = export_spice(Path(args.output_dir))
     print(f"exported Spice layout to {path}")
+    return 0
+
+
+def cmd_log_event(args: argparse.Namespace) -> int:
+    try:
+        context = json.loads(args.context) if args.context else {}
+        if not isinstance(context, dict):
+            raise ValueError("--context must be a JSON object")
+    except ValueError as exc:
+        payload = _standard_payload(
+            ok=False,
+            severity="error",
+            summary="Invalid log event context",
+            error=str(exc),
+            error_details=error_details(exc),
+        )
+        if args.json:
+            _json(payload)
+        else:
+            print(str(exc), file=sys.stderr)
+        return 2
+    path = write_log(
+        level=args.level,
+        component=args.component,
+        event=args.event,
+        action=args.action,
+        outcome=args.outcome,
+        message=args.message,
+        context=context,
+    )
+    if args.json:
+        _json(
+            _standard_payload(
+                ok=True,
+                severity="info",
+                summary="Log event recorded",
+                messages=[f"logged {args.event}"],
+                error=None,
+                recorded_log_path=str(path),
+            )
+        )
     return 0
 
 
@@ -514,10 +712,16 @@ def build_parser() -> argparse.ArgumentParser:
     watch.add_argument("--interval", type=float, default=5.0)
     watch.set_defaults(func=cmd_watch)
 
-    install = sub.add_parser("install-autostart", help="install XDG autostart entry")
+    autostart_status = sub.add_parser("autostart-status", help="show legacy XDG autostart watcher status")
+    autostart_status.add_argument("--json", action="store_true")
+    autostart_status.set_defaults(func=cmd_autostart_status)
+
+    install = sub.add_parser("install-autostart", help="install optional legacy XDG autostart watcher")
+    install.add_argument("--json", action="store_true")
     install.set_defaults(func=cmd_install_autostart)
 
-    uninstall = sub.add_parser("uninstall-autostart", help="remove XDG autostart entry")
+    uninstall = sub.add_parser("uninstall-autostart", help="remove optional legacy XDG autostart watcher")
+    uninstall.add_argument("--json", action="store_true")
     uninstall.set_defaults(func=cmd_uninstall_autostart)
 
     diagnose = sub.add_parser("diagnose", help="collect read-only diagnostics")
@@ -526,27 +730,130 @@ def build_parser() -> argparse.ArgumentParser:
 
     install_applet_parser = sub.add_parser("install-applet", help="install Cinnamon applet files")
     install_applet_parser.add_argument("--enable", action="store_true")
+    install_applet_parser.add_argument("--json", action="store_true")
     install_applet_parser.set_defaults(func=cmd_install_applet)
 
     enable_applet_parser = sub.add_parser("enable-applet", help="enable the Cinnamon applet")
+    enable_applet_parser.add_argument("--json", action="store_true")
     enable_applet_parser.set_defaults(func=cmd_enable_applet)
 
     disable_applet_parser = sub.add_parser("disable-applet", help="disable the Cinnamon applet")
+    disable_applet_parser.add_argument("--json", action="store_true")
     disable_applet_parser.set_defaults(func=cmd_disable_applet)
 
     uninstall_applet_parser = sub.add_parser("uninstall-applet", help="remove installed Cinnamon applet files")
+    uninstall_applet_parser.add_argument("--json", action="store_true")
     uninstall_applet_parser.set_defaults(func=cmd_uninstall_applet)
 
     export = sub.add_parser("export-spice", help="export Cinnamon Spices package layout")
     export.add_argument("output_dir", nargs="?", default="dist")
     export.set_defaults(func=cmd_export_spice)
+
+    log_event = sub.add_parser("log-event", help="record a structured applet/backend event")
+    log_event.add_argument("--json", action="store_true")
+    log_event.add_argument("--level", default="info")
+    log_event.add_argument("--component", default="applet")
+    log_event.add_argument("--event", required=True)
+    log_event.add_argument("--action")
+    log_event.add_argument("--outcome")
+    log_event.add_argument("--message")
+    log_event.add_argument("--context")
+    log_event.set_defaults(func=cmd_log_event)
     return parser
+
+
+MUTATING_COMMANDS = {
+    "capture",
+    "restore",
+    "apply",
+    "watch",
+    "install-applet",
+    "enable-applet",
+    "disable-applet",
+    "uninstall-applet",
+    "install-autostart",
+    "uninstall-autostart",
+}
+
+
+def _json_requested(args: argparse.Namespace) -> bool:
+    return bool(getattr(args, "json", False))
+
+
+def _lock_refused_payload(command: str, exc: LockRefused) -> dict[str, Any]:
+    return _standard_payload(
+        ok=False,
+        severity="warning",
+        summary="Another Cinnamon Panel Anchor action is already running",
+        messages=[],
+        error=str(exc),
+        error_details={"type": type(exc).__name__, "message": str(exc), "lock_path": str(exc.path), "lock": exc.metadata},
+        lock_path=str(exc.path),
+        lock=exc.metadata,
+    )
+
+
+def _dispatch(args: argparse.Namespace) -> int:
+    command = args.command
+    if command in MUTATING_COMMANDS:
+        with CommandLock(command):
+            return args.func(args)
+    return args.func(args)
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    return args.func(args)
+    started = time.time()
+    try:
+        code = _dispatch(args)
+        write_log(
+            level="info" if code == 0 else "error",
+            component="backend",
+            event="command-finished",
+            command=args.command,
+            outcome="ok" if code == 0 else "failed",
+            context={"exit_code": code, "duration_seconds": round(time.time() - started, 3)},
+        )
+        return code
+    except LockRefused as exc:
+        write_log(
+            level="warning",
+            component="backend",
+            event="lock-refused",
+            command=args.command,
+            outcome="skipped",
+            message=str(exc),
+            context={"lock_path": str(exc.path), "lock": exc.metadata},
+            exception=exc,
+        )
+        if _json_requested(args):
+            _json(_lock_refused_payload(args.command, exc))
+        else:
+            print(str(exc), file=sys.stderr)
+        return 3
+    except Exception as exc:
+        write_log(
+            level="error",
+            component="backend",
+            event="command-exception",
+            command=getattr(args, "command", None),
+            outcome="failed",
+            message=str(exc),
+            exception=exc,
+        )
+        if _json_requested(args):
+            _json(
+                _standard_payload(
+                    ok=False,
+                    severity="error",
+                    summary="Backend command failed",
+                    error=str(exc),
+                    error_details=error_details(exc),
+                )
+            )
+            return 2
+        raise
 
 
 if __name__ == "__main__":

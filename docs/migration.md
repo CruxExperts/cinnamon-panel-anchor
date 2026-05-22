@@ -21,7 +21,7 @@ Use this migration path:
 1. Remove the old autostart entry:
 
    ```bash
-   cinnamon-panel-anchor uninstall-autostart
+   cinnamon-panel-anchor uninstall-autostart --json
    ```
 
 2. Install and enable the applet:
@@ -34,3 +34,5 @@ Use this migration path:
 4. Use the applet dashboard for restore, keep-current, and diagnostics actions.
 
 Do not delete unrelated display scripts unless you know what they control.
+
+In v0.2.1, Cinnamon's enabled applet entry is the normal startup path. Keep the legacy autostart watcher off unless you intentionally need the old background `watch` workflow.

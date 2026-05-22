@@ -37,9 +37,14 @@ Do not submit generated mockups as final Spices screenshots. Add `screenshot.png
 
 ## Validation Checklist
 
+- `uv run python tools/version_sync.py --check` passes.
+- `uv run python tools/validate.py` passes.
 - `uv run pytest` passes.
 - JSON files validate.
 - README image links resolve to committed files.
 - UUID is consistent across code, docs, metadata, and export layout.
+- Version is synchronized to `0.2.1` from `VERSION`.
+- Startup text distinguishes Cinnamon enabled applet state from the optional legacy autostart watcher.
+- **Quit for Session** and **Disable Applet** are documented as temporary versus persistent actions.
 - Source does not mutate the XRandR primary monitor.
 - Real Cinnamon screenshot exists for submission.
