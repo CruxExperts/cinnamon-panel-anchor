@@ -29,11 +29,24 @@ def test_required_docs_exist_and_are_linked():
         "docs/install.md",
         "docs/troubleshooting.md",
         "docs/architecture.md",
+        "docs/ui-design-patterns.md",
         "docs/migration.md",
         "docs/spices-submission.md",
     ):
         assert (ROOT / relative).exists()
         assert relative in readme
+
+
+def test_ui_design_patterns_reference_required_sources():
+    doc = (ROOT / "docs" / "ui-design-patterns.md").read_text(encoding="utf-8")
+    for url in (
+        "https://developer.gnome.org/hig/guidelines/ui-icons.html",
+        "https://developer.gnome.org/hig/patterns/controls/buttons.html",
+        "https://developer.gnome.org/hig/patterns/feedback/notifications.html",
+        "https://projects.linuxmint.com/reference/git/cinnamon-tutorials/xlet-settings.html",
+        "https://projects.linuxmint.com/reference/git/cinnamon-tutorials/write-applet.html",
+    ):
+        assert url in doc
 
 
 def test_uuid_consistency_in_release_files():

@@ -6,6 +6,8 @@ Cinnamon Panel Anchor is GUI-first. The Cinnamon applet is the resident controll
 
 The default release path is not an invisible autostart watcher. Legacy watcher commands remain available for migration and development only.
 
+The applet popup should follow the documented [UI design patterns](ui-design-patterns.md): a guided status header, one primary next action, grouped secondary actions, disabled reasons for invalid actions, and attention-only notifications.
+
 ## Applet To Backend Contract
 
 The applet invokes the Python backend through JSON commands:

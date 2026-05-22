@@ -1,5 +1,7 @@
 # User Guide
 
+Design intent for future UI changes is tracked in [UI design patterns](ui-design-patterns.md). This guide stays focused on user workflows.
+
 ## Dashboard
 
 The Cinnamon applet is the primary interface. Its popup dashboard shows:

@@ -73,6 +73,7 @@ Legacy autostart watcher commands remain available for development and migration
 - [User guide](docs/user-guide.md)
 - [Troubleshooting](docs/troubleshooting.md)
 - [Architecture](docs/architecture.md)
+- [UI design patterns](docs/ui-design-patterns.md)
 - [Migration guide](docs/migration.md)
 - [Spices submission notes](docs/spices-submission.md)
 
