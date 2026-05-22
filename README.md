@@ -1,72 +1,83 @@
-# cinnamon-panel-anchor
+# Cinnamon Panel Anchor
 
-`cinnamon-panel-anchor` keeps Cinnamon panel placement tied to the physical connector and edge you intended, instead of trusting Cinnamon's numeric monitor indexes after dock, wake, or hotplug changes.
+![Cinnamon Panel Anchor hero](docs/assets/readme/hero.png)
 
-It reads Cinnamon's `org.cinnamon panels-enabled` setting, maps monitor indexes through `xrandr --listmonitors`, and restores panel entries when the same connector appears at a different numeric index. It does not change the display primary monitor.
+[![Python](https://img.shields.io/badge/python-3.10%2B-16324f)](pyproject.toml)
+[![Desktop](https://img.shields.io/badge/Linux%20Mint-Cinnamon%20X11-47b39c)](docs/install.md)
+[![License](https://img.shields.io/badge/license-MIT-16324f)](LICENSE)
 
-## Install For Development
+Cinnamon Panel Anchor is a native Cinnamon applet backed by a small Python utility. It keeps Cinnamon panels attached to the monitor connector and edge you chose, even when XRandR monitor indexes change after login, dock, wake, or hotplug events.
+
+The applet is the resident UI and controller. The CLI remains backend, installer, diagnostics, and release tooling.
+
+Public applet UUID: `cinnamon-panel-anchor@cruxexperts.com`.
+
+## Features
+
+- Native Cinnamon panel applet with protected, working, attention, and error states.
+- Dashboard for health, saved anchors, current monitors, panel entries, pending decisions, and diagnostics.
+- Actions for refresh, capture, restore, keep-current, display settings, diagnostics copy, and applet settings.
+- JSON backend commands for applet integration: `status`, `capture`, `restore`, and `diagnose`.
+- Source installer and Cinnamon Spices export tooling.
+- No display-primary changes. The project never calls `xrandr --primary`.
+
+## Dashboard Preview
+
+![Generated dashboard mockup](docs/assets/readme/dashboard-mockup.png)
+
+Generated mockup for development documentation. Replace with a real Cinnamon screenshot before Spices submission.
+
+![Generated notification mockup](docs/assets/readme/notification-mockup.png)
+
+## Install From Source
 
 ```bash
 uv sync --python /usr/bin/python3
 uv run pytest
-uv run cinnamon-panel-anchor --help
+uv run cinnamon-panel-anchor install-applet --enable
 ```
 
-For an editable user install from a checkout:
+Use `/usr/bin/python3` on Linux Mint so the virtual environment matches the system PyGObject extension ABI. The runtime uses Cinnamon's system Gio bindings; no GTK Python wheels are vendored.
+
+`install-applet` copies the applet and writes a small backend launcher inside the installed applet directory so Cinnamon can call the same Python environment used for installation.
+
+## First Run
+
+1. Arrange your Cinnamon panels where you want them.
+2. Install and enable the applet:
+
+   ```bash
+   uv run cinnamon-panel-anchor install-applet --enable
+   ```
+
+3. Open the applet from the Cinnamon panel.
+4. Choose **Capture Current Layout**.
+5. Use **Restore Saved Anchors** after monitor index drift or let the applet surface attention states.
+
+## Backend CLI
 
 ```bash
-uv tool install --python /usr/bin/python3 --editable .
+uv run cinnamon-panel-anchor status --json
+uv run cinnamon-panel-anchor capture --json
+uv run cinnamon-panel-anchor restore --json --dry-run
+uv run cinnamon-panel-anchor restore --json
+uv run cinnamon-panel-anchor diagnose --json
+uv run cinnamon-panel-anchor export-spice dist
 ```
 
-The runtime uses system PyGObject/GTK/Gio from the desktop session. No GTK Python wheels are vendored by this project. On Debian, Ubuntu, and Linux Mint systems, install the distribution package that provides `gi` for Python, usually `python3-gi`.
+Legacy autostart watcher commands remain available for development and migration, but they are not the default release path.
 
-Use `/usr/bin/python3` for the `uv` environment on Mint so the venv Python version matches the system PyGObject extension. The CLI checks the standard system `dist-packages` path only when the ABI matches the running Python.
+## Documentation
 
-## Basic Use
+- [Install guide](docs/install.md)
+- [User guide](docs/user-guide.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [Architecture](docs/architecture.md)
+- [Migration guide](docs/migration.md)
+- [Spices submission notes](docs/spices-submission.md)
 
-Capture the current panel locations as anchors:
+## How It Works
 
-```bash
-cinnamon-panel-anchor capture
-```
+![Monitor index drift diagram](docs/assets/diagrams/monitor-index-drift.svg)
 
-Show current monitors, Cinnamon panel entries, saved anchors, and pending decisions:
-
-```bash
-cinnamon-panel-anchor status
-cinnamon-panel-anchor status --json
-```
-
-Preview or restore panel placement:
-
-```bash
-cinnamon-panel-anchor apply --dry-run
-cinnamon-panel-anchor restore --dry-run
-cinnamon-panel-anchor restore
-```
-
-Install the login watcher:
-
-```bash
-cinnamon-panel-anchor install-autostart
-```
-
-Remove it:
-
-```bash
-cinnamon-panel-anchor uninstall-autostart
-```
-
-Collect read-only diagnostics:
-
-```bash
-cinnamon-panel-anchor diagnose --json
-```
-
-## Files
-
-- Config: `$XDG_CONFIG_HOME/cinnamon-panel-anchor/config.json`
-- State and logs: `$XDG_STATE_HOME/cinnamon-panel-anchor/`
-- Autostart entry: `$XDG_CONFIG_HOME/autostart/cinnamon-panel-anchor.desktop`
-
-If `XDG_CONFIG_HOME` is unset, `~/.config` is used. If `XDG_STATE_HOME` is unset, `~/.local/state` is used.
+The backend reads Cinnamon's `org.cinnamon panels-enabled` entries and maps their monitor indexes through `xrandr --listmonitors`. Saved anchors store connector plus edge, not transient monitor index.

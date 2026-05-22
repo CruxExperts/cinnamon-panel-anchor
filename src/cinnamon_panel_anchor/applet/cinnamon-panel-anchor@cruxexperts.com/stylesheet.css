@@ -1,0 +1,16 @@
+.panel-anchor-dashboard {
+  spacing: 10px;
+  padding: 12px;
+}
+
+.panel-anchor-title {
+  font-weight: bold;
+}
+
+.panel-anchor-section {
+  padding-top: 6px;
+}
+
+.panel-anchor-muted {
+  color: #9aa0a6;
+}

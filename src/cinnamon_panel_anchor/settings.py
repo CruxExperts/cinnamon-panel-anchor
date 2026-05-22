@@ -22,7 +22,8 @@ def _include_system_gi_path() -> None:
 
 class CinnamonSettings:
     schema = "org.cinnamon"
-    key = "panels-enabled"
+    panels_key = "panels-enabled"
+    applets_key = "enabled-applets"
 
     def __init__(self) -> None:
         _include_system_gi_path()
@@ -39,7 +40,13 @@ class CinnamonSettings:
         self._settings = Gio.Settings.new(self.schema)
 
     def get_panels(self) -> list[str]:
-        return list(self._settings.get_strv(self.key))
+        return list(self._settings.get_strv(self.panels_key))
 
     def set_panels(self, values: list[str]) -> None:
-        self._settings.set_strv(self.key, values)
+        self._settings.set_strv(self.panels_key, values)
+
+    def get_enabled_applets(self) -> list[str]:
+        return list(self._settings.get_strv(self.applets_key))
+
+    def set_enabled_applets(self, values: list[str]) -> None:
+        self._settings.set_strv(self.applets_key, values)

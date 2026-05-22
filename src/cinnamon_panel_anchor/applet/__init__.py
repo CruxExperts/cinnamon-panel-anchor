@@ -1,0 +1,1 @@
+"""Packaged Cinnamon applet assets."""
