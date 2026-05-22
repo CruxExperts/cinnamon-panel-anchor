@@ -6,5 +6,15 @@ from cinnamon_panel_anchor.applet_manager import APPLET_UUID
 def test_applet_assets_are_packaged():
     root = resources.files("cinnamon_panel_anchor.applet") / APPLET_UUID
 
-    for name in ("metadata.json", "applet.js", "settings-schema.json", "stylesheet.css"):
+    for name in (
+        "metadata.json",
+        "applet.js",
+        "settings-schema.json",
+        "stylesheet.css",
+        "icons/anchor-icon.svg",
+        "icons/panel-anchor-ok.svg",
+        "icons/panel-anchor-attention.svg",
+        "icons/panel-anchor-error.svg",
+        "icons/panel-anchor-working.svg",
+    ):
         assert (root / name).is_file()

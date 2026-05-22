@@ -120,7 +120,17 @@ def test_generated_mockups_are_labeled_and_no_spices_screenshot_exists():
 def test_checked_in_spices_files_match_packaged_applet_assets():
     package_root = ROOT / "src" / "cinnamon_panel_anchor" / "applet" / UUID
     spices_root = ROOT / UUID / "files" / UUID
-    for relative in ("metadata.json", "applet.js", "settings-schema.json", "stylesheet.css", "icons/anchor-icon.svg"):
+    for relative in (
+        "metadata.json",
+        "applet.js",
+        "settings-schema.json",
+        "stylesheet.css",
+        "icons/anchor-icon.svg",
+        "icons/panel-anchor-ok.svg",
+        "icons/panel-anchor-attention.svg",
+        "icons/panel-anchor-error.svg",
+        "icons/panel-anchor-working.svg",
+    ):
         assert (spices_root / relative).read_text(encoding="utf-8") == (package_root / relative).read_text(encoding="utf-8")
 
 
@@ -149,6 +159,21 @@ def test_applet_lifecycle_and_settings_controls_are_declared():
     assert schema["restore-automatically"]["type"] == "switch"
     assert schema["legacy-autostart-watcher"]["default"] is False
     assert schema["debug-logging"]["default"] is True
+
+
+def test_applet_uses_project_icon_assets_not_generic_status_icons():
+    applet = (ROOT / "src" / "cinnamon_panel_anchor" / "applet" / UUID / "applet.js").read_text(encoding="utf-8")
+    icons = ROOT / "src" / "cinnamon_panel_anchor" / "applet" / UUID / "icons"
+
+    assert "set_applet_icon_path" in applet
+    assert "set_applet_icon_symbolic_name" not in applet
+    for generic in ("emblem-ok-symbolic", "dialog-error-symbolic", "dialog-warning-symbolic", "view-refresh-symbolic"):
+        assert generic not in applet
+    for name in ("anchor-icon.svg", "panel-anchor-ok.svg", "panel-anchor-attention.svg", "panel-anchor-error.svg", "panel-anchor-working.svg"):
+        assert (icons / name).exists()
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "docs/assets/brand/panel-anchor-logo.svg" in readme
+    assert (ROOT / "docs/assets/brand/panel-anchor-logo.svg").exists()
 
 
 def test_source_never_sets_xrandr_primary():

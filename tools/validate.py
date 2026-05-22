@@ -42,12 +42,15 @@ def main() -> int:
     check("Slavic Kozyuk" in readme, "README must include maintainer", failures)
     check("https://github.com/CruxExperts" in readme, "README must include GitHub profile", failures)
     check("https://www.cruxexperts.com" in readme, "README must include company backlink", failures)
+    check("docs/assets/brand/panel-anchor-logo.svg" in readme, "README must include project logo", failures)
 
     for path in [
         ROOT / "SECURITY.md",
         ROOT / "CONTRIBUTING.md",
         ROOT / "docs/VERSIONING.md",
         ROOT / "docs/PUBLISHING_CHECKLIST.md",
+        ROOT / "docs/assets/brand/panel-anchor-logo.svg",
+        ROOT / "docs/assets/brand/anchor-icon.svg",
         ROOT / ".github/workflows/ci.yml",
         ROOT / ".github/dependabot.yml",
         ROOT / ".github/pull_request_template.md",

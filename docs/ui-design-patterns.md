@@ -10,7 +10,7 @@ The current popup behaves like a flat command menu. It exposes several actions a
 
 Use a guided status popup. The first visible content should explain the current anchor state, then offer the one best next action for that state. Secondary actions remain available, but grouped below the primary action so the user does not have to interpret a command list while troubleshooting a panel placement issue.
 
-The visual metaphor is a panel-anchor glyph: a small panel edge joined to an anchor point. Use that metaphor for applet identity and for custom state icons only when standard symbolic icons cannot express the state clearly.
+The visual metaphor is a panel-anchor glyph: a small Cinnamon panel segment pinned to a connector point. Use that metaphor for applet identity and applet state icons so the panel icon remains recognizable at a glance.
 
 Invalid actions should stay visible but disabled. A disabled restore action with a short reason is clearer than hiding restore when no anchors exist, because it teaches what must happen next.
 
@@ -25,10 +25,10 @@ Invalid actions should stay visible but disabled. A disabled restore action with
 
 ## Icon Rules
 
-- Use simple symbolic icons for popup actions and panel state.
-- Prefer recognizable Cinnamon, XApp, GNOME, or freedesktop-style glyphs before creating custom artwork.
-- Use the custom panel-anchor glyph for applet identity and anchor-specific states that theme icons cannot communicate.
-- Keep custom symbolic icons monochrome, simple, and legible at panel size.
+- Use simple symbolic icons for popup actions.
+- Prefer recognizable Cinnamon, XApp, GNOME, or freedesktop-style glyphs for common commands.
+- Use the custom panel-anchor glyph for applet identity and panel state, with small status badges for protected, working, attention, and error states.
+- Keep custom icons simple and legible at panel size.
 - Do not rely on an icon alone when the command is not widely recognized.
 
 ## Notification Rules
@@ -45,7 +45,7 @@ Invalid actions should stay visible but disabled. A disabled restore action with
 - Use `setSensitive()` for invalid-but-visible actions.
 - Store user-facing preferences in `settings-schema.json`.
 - Bind applet settings with `Settings.AppletSettings`.
-- Use `set_applet_icon_symbolic_path()` for custom symbolic state icons when theme icons are insufficient.
+- Use `set_applet_icon_path()` for packaged custom state icons so Cinnamon does not fall back to generic theme symbols.
 - Keep the applet as the resident UI/controller. The CLI remains backend, installer, diagnostics, and packaging support tooling.
 
 ## Source References

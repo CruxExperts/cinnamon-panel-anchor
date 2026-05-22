@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 180" role="img" aria-label="Cinnamon Panel Anchor">
+  <rect width="720" height="180" rx="18" fill="#f6f8f7"/>
+  <g transform="translate(42 30)">
+    <rect width="120" height="120" rx="24" fill="#13263a"/>
+    <path d="M27 28h66a9 9 0 0 1 9 9v44a9 9 0 0 1-9 9H27a9 9 0 0 1-9-9V37a9 9 0 0 1 9-9z" fill="#eef3f1"/>
+    <path d="M27 38h66v13H27z" fill="#36a58f"/>
+    <path d="M27 58h66v24H27z" fill="#d9e3df"/>
+    <path d="M34 67h27v8H34zm34 0h18v8H68z" fill="#13263a" opacity=".42"/>
+    <path d="M60 18v84" stroke="#13263a" stroke-width="10" stroke-linecap="round"/>
+    <path d="M44 102h32" stroke="#13263a" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="60" cy="41" r="15" fill="#13263a"/>
+    <circle cx="60" cy="41" r="6" fill="#eef3f1"/>
+  </g>
+  <text x="198" y="82" font-family="Inter, Segoe UI, Cantarell, sans-serif" font-size="42" font-weight="700" fill="#13263a">Cinnamon Panel Anchor</text>
+  <text x="201" y="122" font-family="Inter, Segoe UI, Cantarell, sans-serif" font-size="19" fill="#48606a">connector-stable panel placement for Cinnamon/X11</text>
+</svg>

@@ -1,5 +1,7 @@
 # Cinnamon Panel Anchor
 
+![Cinnamon Panel Anchor logo](docs/assets/brand/panel-anchor-logo.svg)
+
 ![Cinnamon Panel Anchor hero](docs/assets/readme/hero.png)
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-16324f)](pyproject.toml)
@@ -15,6 +17,7 @@ Public applet UUID: `cinnamon-panel-anchor@cruxexperts.com`.
 ## Features
 
 - Native Cinnamon panel applet with protected, working, attention, and error states.
+- Custom panel-anchor logo and state icons, so the panel icon is recognizable instead of a generic theme checkmark.
 - Dashboard for health, saved anchors, current monitors, panel entries, pending decisions, and diagnostics.
 - Actions for refresh, capture, restore, keep-current, display settings, diagnostics copy, and applet settings.
 - Explicit lifecycle controls: **Quit for Session** hides the applet until Cinnamon reloads; **Disable Applet** removes the persistent Cinnamon enabled-applet entry.

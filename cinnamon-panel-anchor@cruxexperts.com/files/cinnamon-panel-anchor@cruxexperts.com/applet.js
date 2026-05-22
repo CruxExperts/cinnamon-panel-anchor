@@ -11,6 +11,13 @@ const UUID = "cinnamon-panel-anchor@cruxexperts.com";
 const VERSION = "0.2.1";
 const APPLET_PATH = imports.ui.appletManager.appletMeta[UUID].path;
 const AppletManager = imports.ui.appletManager;
+const ICONS = {
+    ok: APPLET_PATH + "/icons/panel-anchor-ok.svg",
+    attention: APPLET_PATH + "/icons/panel-anchor-attention.svg",
+    error: APPLET_PATH + "/icons/panel-anchor-error.svg",
+    working: APPLET_PATH + "/icons/panel-anchor-working.svg",
+    brand: APPLET_PATH + "/icons/anchor-icon.svg"
+};
 
 function backendCommand() {
     let launcher = APPLET_PATH + "/cinnamon-panel-anchor-backend";
@@ -102,7 +109,7 @@ class CinnamonPanelAnchorApplet extends Applet.TextIconApplet {
         this._inFlight = {};
         this._stoppedForSession = false;
         this.setAllowedLayout(Applet.AllowedLayout.BOTH);
-        this.set_applet_icon_symbolic_name("anchor");
+        this._setAppletIcon("brand");
         this.set_applet_label("");
         this.set_applet_tooltip("Cinnamon Panel Anchor " + VERSION);
         this._applet_context_menu.addAction("Open Applet Settings", () => this.configureApplet());
@@ -201,14 +208,18 @@ class CinnamonPanelAnchorApplet extends Applet.TextIconApplet {
     }
 
     _setState(payload) {
-        let icon = "emblem-ok-symbolic";
+        let icon = "ok";
         if (!payload.ok || payload.severity === "error")
-            icon = "dialog-error-symbolic";
+            icon = "error";
         else if (payload.pending_decision || payload.severity === "attention")
-            icon = "dialog-warning-symbolic";
+            icon = "attention";
         else if (payload.plan && payload.plan.changed)
-            icon = "view-refresh-symbolic";
-        this.set_applet_icon_symbolic_name(icon);
+            icon = "working";
+        this._setAppletIcon(icon);
+    }
+
+    _setAppletIcon(state) {
+        this.set_applet_icon_path(ICONS[state] || ICONS.brand);
     }
 
     _statusLine(label, value) {
@@ -275,7 +286,7 @@ class CinnamonPanelAnchorApplet extends Applet.TextIconApplet {
         }
         this._inFlight[key] = true;
         this._logAppletEvent("action-started", "started", key, { args: args });
-        this.set_applet_icon_symbolic_name("view-refresh-symbolic");
+        this._setAppletIcon("working");
         runBackend(args, (payload) => {
             this._inFlight[key] = false;
             this._render(payload);

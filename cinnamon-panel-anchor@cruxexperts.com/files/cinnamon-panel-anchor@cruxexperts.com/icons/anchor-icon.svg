@@ -1,6 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#16324f"/>
-  <path d="M32 10a8 8 0 1 0 0 16 8 8 0 0 0 0-16zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" fill="#f7f4ee"/>
-  <path d="M29 25h6v22c6-1 10-5 12-11l6 2c-3 10-11 16-21 16s-18-6-21-16l6-2c2 6 6 10 12 11V25z" fill="#f7f4ee"/>
-  <path d="M20 31h24v6H20z" fill="#47b39c"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Cinnamon Panel Anchor logo">
+  <rect width="64" height="64" rx="12" fill="#13263a"/>
+  <path d="M14 15h36a5 5 0 0 1 5 5v24a5 5 0 0 1-5 5H14a5 5 0 0 1-5-5V20a5 5 0 0 1 5-5z" fill="#eef3f1"/>
+  <path d="M14 20h36v7H14z" fill="#36a58f"/>
+  <path d="M14 31h36v13H14z" fill="#d9e3df"/>
+  <path d="M18 36h14v4H18zm18 0h10v4H36z" fill="#13263a" opacity=".42"/>
+  <path d="M32 10v44" stroke="#13263a" stroke-width="5" stroke-linecap="round"/>
+  <path d="M24 54h16" stroke="#13263a" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="32" cy="22" r="8" fill="#13263a"/>
+  <circle cx="32" cy="22" r="3.5" fill="#eef3f1"/>
 </svg>
