@@ -1,0 +1,35 @@
+[project]
+name = "cinnamon-panel-anchor"
+version = "0.1.0"
+description = "Restore Cinnamon panel placement by connector and edge after XRandR monitor index drift."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "cinnamon-panel-anchor contributors" }]
+keywords = ["cinnamon", "linux-mint", "x11", "xrandr", "panel"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: X11 Applications",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+]
+dependencies = []
+
+[project.scripts]
+cinnamon-panel-anchor = "cinnamon_panel_anchor.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
