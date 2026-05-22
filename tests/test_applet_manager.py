@@ -5,6 +5,7 @@ class FakeAppletSettings:
     def __init__(self, values=None):
         self.values = list(values or [])
         self.writes = []
+        self.next_applet_id = 12
 
     def get_enabled_applets(self):
         return self.values
@@ -13,16 +14,37 @@ class FakeAppletSettings:
         self.writes.append(values)
         self.values = values
 
+    def get_next_applet_id(self):
+        return self.next_applet_id
+
+    def set_next_applet_id(self, value):
+        self.next_applet_id = value
+
 
 def test_enable_and_disable_applet_updates_enabled_applets():
     settings = FakeAppletSettings(["panel1:left:0:menu@cinnamon.org:0"])
 
     assert applet_manager.enable_applet(settings) is True
-    assert any(applet_manager.APPLET_UUID in value for value in settings.values)
+    assert settings.values[-1] == f"panel1:right:0:{applet_manager.APPLET_UUID}:12:orient"
+    assert settings.next_applet_id == 13
     assert applet_manager.enable_applet(settings) is False
 
     assert applet_manager.disable_applet(settings) is True
     assert all(applet_manager.APPLET_UUID not in value for value in settings.values)
+
+
+def test_enable_applet_appends_after_existing_right_panel_entries():
+    settings = FakeAppletSettings(
+        [
+            "panel1:right:0:systray@cinnamon.org:3",
+            "panel1:right:4:calendar@cinnamon.org:13",
+            "panel1:left:2:menu@cinnamon.org:0",
+        ]
+    )
+
+    assert applet_manager.enable_applet(settings) is True
+
+    assert settings.values[-1] == f"panel1:right:5:{applet_manager.APPLET_UUID}:12:orient"
 
 
 def test_install_applet_copies_packaged_assets(monkeypatch, tmp_path):

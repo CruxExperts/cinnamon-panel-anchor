@@ -24,6 +24,7 @@ class CinnamonSettings:
     schema = "org.cinnamon"
     panels_key = "panels-enabled"
     applets_key = "enabled-applets"
+    next_applet_id_key = "next-applet-id"
 
     def __init__(self) -> None:
         _include_system_gi_path()
@@ -37,6 +38,7 @@ class CinnamonSettings:
         source = Gio.SettingsSchemaSource.get_default()
         if source is None or source.lookup(self.schema, True) is None:
             raise CinnamonSettingsError(f"Gio schema {self.schema!r} is not available")
+        self._gio_settings = Gio.Settings
         self._settings = Gio.Settings.new(self.schema)
 
     def get_panels(self) -> list[str]:
@@ -44,9 +46,18 @@ class CinnamonSettings:
 
     def set_panels(self, values: list[str]) -> None:
         self._settings.set_strv(self.panels_key, values)
+        self._gio_settings.sync()
 
     def get_enabled_applets(self) -> list[str]:
         return list(self._settings.get_strv(self.applets_key))
 
     def set_enabled_applets(self, values: list[str]) -> None:
         self._settings.set_strv(self.applets_key, values)
+        self._gio_settings.sync()
+
+    def get_next_applet_id(self) -> int:
+        return int(self._settings.get_int(self.next_applet_id_key))
+
+    def set_next_applet_id(self, value: int) -> None:
+        self._settings.set_int(self.next_applet_id_key, value)
+        self._gio_settings.sync()

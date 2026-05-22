@@ -13,6 +13,8 @@ The Cinnamon applet is the primary interface. Its popup dashboard shows:
 - Pending decisions: manual moves that need a keep-or-restore choice.
 - Diagnostics summary: backend errors, missing Gio bindings, or XRandR mapping failures.
 
+The applet can be placed on top, bottom, left, or right Cinnamon panels.
+
 ## Capture Current Layout
 
 Use **Capture Current Layout** after arranging panels where you want them. The backend stores each panel as connector plus edge.

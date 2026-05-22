@@ -61,6 +61,7 @@ class CinnamonPanelAnchorApplet extends Applet.TextIconApplet {
         this.showNotifications = true;
         this._refreshTimer = 0;
         this._lastNotificationKey = null;
+        this.setAllowedLayout(Applet.AllowedLayout.BOTH);
         this.set_applet_icon_symbolic_name("anchor");
         this.set_applet_label("");
         this.set_applet_tooltip("Cinnamon Panel Anchor");

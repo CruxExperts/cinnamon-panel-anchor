@@ -97,6 +97,11 @@ def test_checked_in_spices_files_match_packaged_applet_assets():
         assert (spices_root / relative).read_text(encoding="utf-8") == (package_root / relative).read_text(encoding="utf-8")
 
 
+def test_applet_declares_vertical_panel_support():
+    applet = (ROOT / "src" / "cinnamon_panel_anchor" / "applet" / UUID / "applet.js").read_text(encoding="utf-8")
+    assert "setAllowedLayout(Applet.AllowedLayout.BOTH)" in applet
+
+
 def test_source_never_sets_xrandr_primary():
     offenders = []
     forbidden = "xrandr --" + "primary"

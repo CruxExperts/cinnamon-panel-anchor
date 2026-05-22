@@ -12,7 +12,7 @@ from .settings import CinnamonSettings, CinnamonSettingsError
 
 
 APPLET_UUID = "cinnamon-panel-anchor@cruxexperts.com"
-APPLET_ENTRY = f"panel1:right:0:{APPLET_UUID}:0"
+APPLET_ENTRY = f"panel1:right:0:{APPLET_UUID}:0:orient"
 
 
 def cinnamon_applets_dir() -> Path:
@@ -71,8 +71,22 @@ def enable_applet(settings: CinnamonSettings | None = None) -> bool:
     values = settings.get_enabled_applets()
     if any(f":{APPLET_UUID}:" in value or value.endswith(f":{APPLET_UUID}") for value in values):
         return False
-    settings.set_enabled_applets([*values, APPLET_ENTRY])
+    applet_id = settings.get_next_applet_id()
+    settings.set_next_applet_id(applet_id + 1)
+    settings.set_enabled_applets([*values, _applet_entry(values, applet_id)])
     return True
+
+
+def _applet_entry(values: list[str], applet_id: int) -> str:
+    order = 0
+    for value in values:
+        parts = value.split(":")
+        if len(parts) >= 3 and parts[0] == "panel1" and parts[1] == "right":
+            try:
+                order = max(order, int(parts[2]) + 1)
+            except ValueError:
+                continue
+    return f"panel1:right:{order}:{APPLET_UUID}:{applet_id}:orient"
 
 
 def disable_applet(settings: CinnamonSettings | None = None) -> bool:
