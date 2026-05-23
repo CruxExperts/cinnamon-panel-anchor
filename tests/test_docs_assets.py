@@ -69,7 +69,7 @@ def test_versions_are_consistent():
     metadata = json.loads((ROOT / "src" / "cinnamon_panel_anchor" / "applet" / UUID / "metadata.json").read_text(encoding="utf-8"))
     info = json.loads((ROOT / UUID / "info.json").read_text(encoding="utf-8"))
 
-    assert version == "0.2.1"
+    assert version == "0.2.2"
     assert (ROOT / "src" / "cinnamon_panel_anchor" / "_version.txt").read_text(encoding="utf-8").strip() == version
     assert metadata["version"] == version
     for path in (
@@ -112,9 +112,53 @@ def test_generated_mockups_are_labeled_and_no_spices_screenshot_exists():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     spices = (ROOT / "docs" / "spices-submission.md").read_text(encoding="utf-8")
 
-    assert "Generated mockup" in readme
+    assert "Generated visual, not a real Cinnamon screenshot" in readme
+    assert "Generated mockup, not a real Cinnamon screenshot" in readme
     assert "Do not submit generated mockups" in spices
     assert not (ROOT / UUID / "screenshot.png").exists()
+
+
+def test_readme_primary_install_path_is_checksum_verified_release_based():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+
+    assert "checksum-verified" in readme
+    assert "releases/download/v0.2.2/install-cinnamon-panel-anchor-0.2.2.sh" in readme
+    assert "sha256sum -c -" in readme
+    assert "latest/download" not in readme
+    assert "raw.githubusercontent.com" not in readme
+    assert "curl | sh" not in readme
+    assert readme.index("## Install") < readme.index("## Source Checkout")
+
+
+def test_asset_manifest_labels_generated_public_images():
+    manifest = json.loads((ROOT / "docs" / "assets" / "manifest.json").read_text(encoding="utf-8"))
+    assets = {entry["path"]: entry for entry in manifest["assets"]}
+
+    for relative in (
+        "docs/assets/readme/hero.png",
+        "docs/assets/social/social-preview.png",
+        "docs/assets/readme/dashboard-mockup.png",
+        "docs/assets/readme/notification-mockup.png",
+    ):
+        assert relative in assets
+        assert assets[relative]["generated"] is True
+        assert assets[relative]["real_cinnamon_screenshot"] is False
+        assert "not a real Cinnamon screenshot" in assets[relative]["usage_note"]
+
+
+def test_public_assets_are_intentionally_referenced():
+    docs = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in [
+            ROOT / "README.md",
+            ROOT / "docs" / "architecture.md",
+            ROOT / "docs" / "assets" / "README.md",
+            ROOT / "docs" / "assets" / "manifest.json",
+        ]
+    )
+
+    assert "docs/assets/social/social-preview.png" in docs
+    assert "assets/diagrams/applet-backend-flow.svg" in docs
 
 
 def test_checked_in_spices_files_match_packaged_applet_assets():

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from cinnamon_panel_anchor import applet_manager
 
 
@@ -60,6 +62,53 @@ def test_install_applet_copies_packaged_assets(monkeypatch, tmp_path):
     assert launcher.exists()
     assert launcher.stat().st_mode & 0o111
     assert "-m cinnamon_panel_anchor.cli" in launcher.read_text(encoding="utf-8")
+    assert "PYTHONPATH" not in launcher.read_text(encoding="utf-8")
+
+
+def test_install_applet_with_backend_source_writes_stable_pythonpath(monkeypatch, tmp_path):
+    monkeypatch.setattr(applet_manager, "cinnamon_applets_dir", lambda: tmp_path / "applets")
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    backend_source = tmp_path / "release" / "src"
+    package = backend_source / "cinnamon_panel_anchor"
+    package.mkdir(parents=True)
+    (package / "__init__.py").write_text("", encoding="utf-8")
+
+    path = applet_manager.install_applet(backend_source=backend_source)
+
+    launcher = (path / "cinnamon-panel-anchor-backend").read_text(encoding="utf-8")
+    assert f"export PYTHONPATH={backend_source}" in launcher
+    assert "exec /usr/bin/python3 -m cinnamon_panel_anchor.cli" in launcher
+    assert str(tmp_path / "tmp") not in launcher
+
+
+def test_backend_source_must_be_absolute_and_importable(tmp_path):
+    try:
+        applet_manager.validate_backend_source(Path("src"))
+    except ValueError as exc:
+        assert "absolute" in str(exc)
+    else:
+        raise AssertionError("relative backend source accepted")
+
+    missing = tmp_path / "src"
+    try:
+        applet_manager.validate_backend_source(missing)
+    except ValueError as exc:
+        assert "importable cinnamon_panel_anchor" in str(exc)
+    else:
+        raise AssertionError("missing package accepted")
+
+
+def test_invalid_backend_source_does_not_install_partial_applet(monkeypatch, tmp_path):
+    monkeypatch.setattr(applet_manager, "cinnamon_applets_dir", lambda: tmp_path / "applets")
+
+    try:
+        applet_manager.install_applet(backend_source=tmp_path / "missing")
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("invalid backend source accepted")
+
+    assert not (tmp_path / "applets" / applet_manager.APPLET_UUID).exists()
 
 
 def test_install_applet_removes_pre_release_autostart_file(monkeypatch, tmp_path):

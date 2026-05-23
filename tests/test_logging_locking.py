@@ -64,7 +64,7 @@ def test_jsonl_logging_schema_and_retention(monkeypatch, tmp_path):
     first = json.loads(lines[0])
     last = json.loads(lines[-1])
     assert first["context"]["index"] == 5
-    assert last["version"] == "0.2.1"
+    assert last["version"] == "0.2.2"
     assert {"timestamp", "level", "component", "event", "version", "command", "action", "outcome", "message", "context", "exception"} <= set(last)
 
 

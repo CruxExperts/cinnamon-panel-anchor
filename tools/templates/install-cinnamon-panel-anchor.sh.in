@@ -1,0 +1,74 @@
+#!/bin/sh
+set -eu
+
+VERSION="@@VERSION@@"
+REPO="CruxExperts/cinnamon-panel-anchor"
+BUNDLE="cinnamon-panel-anchor-${VERSION}.tar.gz"
+BUNDLE_SHA256="@@BUNDLE_SHA256@@"
+BASE_URL="https://github.com/${REPO}/releases/download/v${VERSION}"
+INSTALL_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/cinnamon-panel-anchor"
+VERSION_DIR="${INSTALL_ROOT}/versions/${VERSION}"
+CURRENT_LINK="${INSTALL_ROOT}/current"
+BIN_DIR="$HOME/.local/bin"
+TMPDIR="$(mktemp -d)"
+
+cleanup() {
+  rm -rf "$TMPDIR"
+}
+trap cleanup EXIT HUP INT TERM
+
+need_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "missing required command: $1" >&2
+    exit 1
+  fi
+}
+
+need_command /usr/bin/python3
+need_command curl
+need_command sha256sum
+need_command tar
+need_command gsettings
+need_command xrandr
+
+if ! gsettings list-schemas | grep -qx 'org.cinnamon'; then
+  echo "Cinnamon GSettings schema org.cinnamon is unavailable" >&2
+  exit 1
+fi
+
+if ! xrandr --listmonitors >/dev/null 2>&1; then
+  echo "XRandR monitor listing is unavailable; Cinnamon Panel Anchor targets Linux Mint Cinnamon on X11" >&2
+  exit 1
+fi
+
+curl -fL --proto '=https' --tlsv1.2 -o "$TMPDIR/$BUNDLE" "$BASE_URL/$BUNDLE"
+printf '%s  %s\n' "$BUNDLE_SHA256" "$TMPDIR/$BUNDLE" | sha256sum -c -
+
+rm -rf "$VERSION_DIR"
+mkdir -p "$VERSION_DIR"
+tar -xzf "$TMPDIR/$BUNDLE" -C "$VERSION_DIR" --strip-components=1
+
+if [ ! -f "$VERSION_DIR/VERSION" ] || [ "$(cat "$VERSION_DIR/VERSION")" != "$VERSION" ]; then
+  echo "downloaded bundle does not contain expected version $VERSION" >&2
+  exit 1
+fi
+
+if [ ! -f "$VERSION_DIR/src/cinnamon_panel_anchor/__init__.py" ]; then
+  echo "downloaded bundle is missing src/cinnamon_panel_anchor" >&2
+  exit 1
+fi
+
+ln -sfn "$VERSION_DIR" "$CURRENT_LINK"
+mkdir -p "$BIN_DIR"
+cat > "$BIN_DIR/cinnamon-panel-anchor" <<EOF
+#!/bin/sh
+export CINNAMON_PANEL_ANCHOR_BACKEND_SOURCE="$VERSION_DIR/src"
+export PYTHONPATH="$VERSION_DIR/src"\${PYTHONPATH:+:\$PYTHONPATH}
+exec /usr/bin/python3 -m cinnamon_panel_anchor.cli "\$@"
+EOF
+chmod 755 "$BIN_DIR/cinnamon-panel-anchor"
+
+PYTHONPATH="$VERSION_DIR/src${PYTHONPATH:+:$PYTHONPATH}" /usr/bin/python3 -m cinnamon_panel_anchor.cli install-applet --backend-source "$VERSION_DIR/src" --enable
+
+echo "Cinnamon Panel Anchor $VERSION installed."
+echo "Restart Cinnamon if the applet does not appear: Alt+F2, r, Enter."

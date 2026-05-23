@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -16,6 +17,7 @@ from .applet_manager import (
     install_applet,
     installed_applet_path,
     uninstall_applet,
+    validate_backend_source,
 )
 from .locking import CommandLock, LockRefused
 from .logging import error_details, log_path, write_log
@@ -466,7 +468,26 @@ def cmd_diagnose(args: argparse.Namespace) -> int:
 
 
 def cmd_install_applet(args: argparse.Namespace) -> int:
-    path = install_applet()
+    backend_source = None
+    backend_source_arg = args.backend_source or os.environ.get("CINNAMON_PANEL_ANCHOR_BACKEND_SOURCE")
+    if backend_source_arg:
+        try:
+            backend_source = validate_backend_source(Path(backend_source_arg))
+        except ValueError as exc:
+            if args.json:
+                _json(
+                    _standard_payload(
+                        ok=False,
+                        severity="error",
+                        summary="Invalid backend source",
+                        error=str(exc),
+                        backend_source=backend_source_arg,
+                    )
+                )
+                return 2
+            print(str(exc), file=sys.stderr)
+            return 2
+    path = install_applet(backend_source=backend_source)
     enabled = False
     if args.enable:
         try:
@@ -499,6 +520,7 @@ def cmd_install_applet(args: argparse.Namespace) -> int:
                 error=None,
                 applet_path=str(path),
                 enabled=enabled,
+                backend_source=str(backend_source) if backend_source else None,
             )
         )
         return 0
@@ -676,6 +698,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     install_applet_parser = sub.add_parser("install-applet", help="install Cinnamon applet files")
     install_applet_parser.add_argument("--enable", action="store_true")
+    install_applet_parser.add_argument("--backend-source", help="absolute src directory for durable release installs")
     install_applet_parser.add_argument("--json", action="store_true")
     install_applet_parser.set_defaults(func=cmd_install_applet)
 

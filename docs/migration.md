@@ -20,7 +20,7 @@ Running `install-applet` removes the old pre-release desktop startup file named 
 
 Use this migration path:
 
-1. Install and enable the applet:
+1. Install and enable the release applet:
 
    ```bash
    cinnamon-panel-anchor install-applet --enable
@@ -28,5 +28,11 @@ Use this migration path:
 
 2. Open the applet and choose **Save Current Layout**.
 3. Use the applet popup for restore, pending keep-or-restore decisions, and diagnostics actions.
+
+For a source checkout, use:
+
+```bash
+uv run cinnamon-panel-anchor install-applet --enable
+```
 
 Do not delete unrelated display scripts unless you know what they control.

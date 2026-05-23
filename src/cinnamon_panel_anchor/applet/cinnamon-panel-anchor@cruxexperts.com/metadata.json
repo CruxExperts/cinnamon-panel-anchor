@@ -1,8 +1,8 @@
 {
-  "uuid": "cinnamon-panel-anchor@cruxexperts.com",
-  "name": "Cinnamon Panel Anchor",
   "description": "Keep Cinnamon panels anchored to monitor connectors when XRandR indexes drift.",
-  "version": "0.2.1",
   "max-instances": "1",
-  "multiversion": false
+  "multiversion": false,
+  "name": "Cinnamon Panel Anchor",
+  "uuid": "cinnamon-panel-anchor@cruxexperts.com",
+  "version": "0.2.2"
 }

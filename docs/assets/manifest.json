@@ -1,0 +1,72 @@
+{
+  "assets": [
+    {
+      "dimensions": "1896x830",
+      "generated": true,
+      "path": "docs/assets/readme/hero.png",
+      "prompt_summary": "Native Cinnamon-style dual-monitor desktop with panel applet popup and connector anchoring, no primary-monitor manipulation.",
+      "real_cinnamon_screenshot": false,
+      "tool": "Codex image_gen",
+      "type": "readme hero",
+      "usage_note": "Generated visual, not a real Cinnamon screenshot."
+    },
+    {
+      "dimensions": "1896x830",
+      "generated": true,
+      "path": "docs/assets/social/social-preview.png",
+      "prompt_summary": "Generated Cinnamon-style background reused from the release hero; exact social-card title/copy is maintained outside the model output.",
+      "real_cinnamon_screenshot": false,
+      "tool": "Codex image_gen",
+      "type": "social preview background",
+      "usage_note": "Generated visual, not a real Cinnamon screenshot."
+    },
+    {
+      "dimensions": "1000x640",
+      "generated": true,
+      "path": "docs/assets/readme/dashboard-mockup.png",
+      "prompt_summary": "Project-owned applet popup mockup for documentation.",
+      "real_cinnamon_screenshot": false,
+      "tool": "deterministic project mockup",
+      "type": "readme mockup",
+      "usage_note": "Generated mockup, not a real Cinnamon screenshot."
+    },
+    {
+      "dimensions": "900x420",
+      "generated": true,
+      "path": "docs/assets/readme/notification-mockup.png",
+      "prompt_summary": "Project-owned Cinnamon notification mockup for documentation.",
+      "real_cinnamon_screenshot": false,
+      "tool": "deterministic project mockup",
+      "type": "readme mockup",
+      "usage_note": "Generated mockup, not a real Cinnamon screenshot."
+    },
+    {
+      "dimensions": "128x128",
+      "generated": false,
+      "path": "docs/assets/brand/anchor-icon-128.png",
+      "prompt_summary": "Raster export of project-owned anchor icon.",
+      "real_cinnamon_screenshot": false,
+      "tool": "project asset export",
+      "type": "brand icon",
+      "usage_note": "Project-owned icon asset."
+    },
+    {
+      "dimensions": "64x64",
+      "generated": false,
+      "path": "docs/assets/brand/anchor-icon-64.png",
+      "prompt_summary": "Raster export of project-owned anchor icon.",
+      "real_cinnamon_screenshot": false,
+      "tool": "project asset export",
+      "type": "brand icon",
+      "usage_note": "Project-owned icon asset."
+    }
+  ],
+  "generated_on": "2026-05-22",
+  "image_generation_source": "Codex generated_images run 019e530c-b611-7973-a41f-ff74f3b6cbfe",
+  "model": "image_gen tool; exact backend model not exposed by tool",
+  "provenance_sources": [
+    "https://developers.openai.com/api/docs/models/gpt-image-2",
+    "https://platform.openai.com/docs/guides/image-generation/",
+    "https://help.openai.com/en/articles/8912793-c2pa-and-synthid-in-openai-generated-images"
+  ]
+}

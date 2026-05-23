@@ -3,7 +3,7 @@ from __future__ import annotations
 from importlib import resources
 
 
-DEFAULT_VERSION = "0.2.1"
+DEFAULT_VERSION = "0.2.2"
 
 
 def get_version() -> str:

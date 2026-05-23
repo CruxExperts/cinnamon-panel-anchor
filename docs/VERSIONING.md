@@ -1,6 +1,6 @@
 # Versioning
 
-`VERSION` is the source of truth. For v0.2.1, the synchronized surfaces are:
+`VERSION` is the source of truth. For v0.2.2, the synchronized surfaces are:
 
 - `pyproject.toml`
 - `src/cinnamon_panel_anchor/_version.txt`

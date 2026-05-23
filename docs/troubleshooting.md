@@ -5,7 +5,7 @@
 Run:
 
 ```bash
-uv run cinnamon-panel-anchor install-applet --enable
+cinnamon-panel-anchor install-applet --enable
 gsettings get org.cinnamon enabled-applets
 ```
 
@@ -46,7 +46,7 @@ Open the applet and capture the intended layout again. If a connector is disconn
 Use **Disable Applet** or:
 
 ```bash
-uv run cinnamon-panel-anchor disable-applet --json
+cinnamon-panel-anchor disable-applet --json
 ```
 
 when you want the persistent Cinnamon enabled-applet entry removed.
@@ -58,3 +58,5 @@ The latest 1000 diagnostic records are stored in:
 ```text
 ~/.local/state/cinnamon-panel-anchor/debug.jsonl
 ```
+
+For a source checkout, prefix backend commands with `uv run`.

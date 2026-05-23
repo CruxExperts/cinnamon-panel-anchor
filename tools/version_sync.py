@@ -58,6 +58,17 @@ def update_applet_js(path: Path, expected: str, write: bool) -> bool:
     return updated == text
 
 
+def update_default_version(expected: str, write: bool) -> bool:
+    path = ROOT / "src/cinnamon_panel_anchor/version.py"
+    text = path.read_text(encoding="utf-8")
+    updated, count = re.subn(r'^DEFAULT_VERSION = "[^"]+"', f'DEFAULT_VERSION = "{expected}"', text, count=1, flags=re.MULTILINE)
+    if count != 1:
+        return False
+    if write and updated != text:
+        path.write_text(updated, encoding="utf-8")
+    return updated == text
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -66,7 +77,7 @@ def main() -> int:
     args = parser.parse_args()
 
     expected = version()
-    checks = [("pyproject.toml", update_pyproject(expected, args.write))]
+    checks = [("pyproject.toml", update_pyproject(expected, args.write)), ("src/cinnamon_panel_anchor/version.py", update_default_version(expected, args.write))]
     for path in VERSION_FILES:
         if path.suffix == ".json":
             checks.append((str(path.relative_to(ROOT)), update_json_version(path, expected, args.write)))

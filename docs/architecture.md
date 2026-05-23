@@ -8,6 +8,8 @@ The applet popup should follow the documented [UI design patterns](ui-design-pat
 
 ## Applet To Backend Contract
 
+![Applet/backend flow](assets/diagrams/applet-backend-flow.svg)
+
 The applet invokes the Python backend through JSON commands:
 
 ```bash

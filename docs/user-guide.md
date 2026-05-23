@@ -21,6 +21,8 @@ Use **Save Current Layout** after arranging panels where you want them. The back
 
 Use **Restore Saved Layout** when panels appear on the wrong monitor after login, wake, dock, or hotplug. Restore changes only Cinnamon panel placement.
 
+The applet and backend never change the display primary monitor.
+
 ## Keep This Layout
 
 Use **Keep This Layout** when the applet reports a pending manual-move decision and you want the current placement to become the saved layout.

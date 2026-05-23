@@ -46,10 +46,12 @@ def _copy_resource_tree(source: resources.abc.Traversable, destination: Path) ->
             target.write_bytes(item.read_bytes())
 
 
-def install_applet() -> Path:
+def install_applet(backend_source: Path | None = None) -> Path:
+    if backend_source is not None:
+        backend_source = validate_backend_source(backend_source)
     destination = installed_applet_path()
     _copy_resource_tree(applet_resource_root(), destination)
-    _write_backend_launcher(destination)
+    _write_backend_launcher(destination, backend_source=backend_source)
     remove_legacy_autostart_file()
     return destination
 
@@ -66,18 +68,25 @@ def remove_legacy_autostart_file() -> bool:
     return True
 
 
-def _write_backend_launcher(destination: Path) -> Path:
+def validate_backend_source(path: Path) -> Path:
+    if not path.is_absolute():
+        raise ValueError("--backend-source must be an absolute path")
+    package_dir = path / "cinnamon_panel_anchor"
+    if not package_dir.is_dir() or not (package_dir / "__init__.py").is_file():
+        raise ValueError("--backend-source must contain importable cinnamon_panel_anchor source")
+    return path
+
+
+def _write_backend_launcher(destination: Path, *, backend_source: Path | None = None) -> Path:
     launcher = destination / "cinnamon-panel-anchor-backend"
-    launcher.write_text(
-        "\n".join(
-            [
-                "#!/bin/sh",
-                f"exec {shlex.quote(sys.executable)} -m cinnamon_panel_anchor.cli \"$@\"",
-                "",
-            ]
-        ),
-        encoding="utf-8",
-    )
+    lines = ["#!/bin/sh"]
+    if backend_source is not None:
+        source = validate_backend_source(backend_source)
+        lines.append(f"export PYTHONPATH={shlex.quote(str(source))}${{PYTHONPATH:+:$PYTHONPATH}}")
+        lines.append("exec /usr/bin/python3 -m cinnamon_panel_anchor.cli \"$@\"")
+    else:
+        lines.append(f"exec {shlex.quote(sys.executable)} -m cinnamon_panel_anchor.cli \"$@\"")
+    launcher.write_text("\n".join([*lines, ""]), encoding="utf-8")
     launcher.chmod(0o755)
     return launcher
 
@@ -161,10 +170,11 @@ def export_spice(output_dir: Path) -> Path:
             [
                 "# Cinnamon Panel Anchor",
                 "",
-                "Cinnamon Panel Anchor keeps panel placement tied to monitor connectors on Linux Mint Cinnamon/X11.",
+                "Cinnamon Panel Anchor keeps Linux Mint Cinnamon/X11 panels tied to the monitor connector and edge you saved.",
                 "",
                 "This export is generated from the Python package's canonical applet assets.",
-                "Generated README mockups are development previews; a real Cinnamon screenshot is required before Spices submission.",
+                "It restores Cinnamon panel placement when monitor indexes drift without changing the primary monitor.",
+                "Generated documentation visuals are not real Cinnamon screenshots; add a real Cinnamon/X11 screenshot before Spices submission.",
                 "",
             ]
         ),

@@ -3,59 +3,74 @@
 ## Requirements
 
 - Linux Mint Cinnamon on X11.
-- `uv` for Python workflow.
-- System PyGObject/Gio available to `/usr/bin/python3`.
+- `/usr/bin/python3`.
+- `curl`, `sha256sum`, and `tar`.
+- Cinnamon GSettings schema `org.cinnamon`.
 - XRandR command-line tools.
 
-## Development Setup
+Wayland is out of scope for this release.
+
+## Release Install
+
+The release path is checksum-verified and does not require `sudo`.
 
 ```bash
-uv sync --python /usr/bin/python3
-uv run pytest
-uv run cinnamon-panel-anchor --help
+tmp="$(mktemp)"
+curl -fL --proto '=https' --tlsv1.2 -o "$tmp" https://github.com/CruxExperts/cinnamon-panel-anchor/releases/download/v0.2.2/install-cinnamon-panel-anchor-0.2.2.sh
+printf '%s  %s\n' '9f64c4079e51fb1dc7d8994e81adb15832e67444e8f96f1d65f068a279dda0dc' "$tmp" | sha256sum -c - && sh "$tmp"
+rm -f "$tmp"
 ```
 
-## Install And Enable The Applet
-
-```bash
-uv run cinnamon-panel-anchor install-applet --enable
-```
-
-The applet is installed to:
+The installer verifies the downloaded app bundle before extracting it, then installs:
 
 ```text
+~/.local/share/cinnamon-panel-anchor/versions/0.2.2/
+~/.local/share/cinnamon-panel-anchor/current
+~/.local/bin/cinnamon-panel-anchor
 ~/.local/share/cinnamon/applets/cinnamon-panel-anchor@cruxexperts.com/
 ```
 
-The install command also writes `cinnamon-panel-anchor-backend` into that directory. The applet uses this launcher first, so a source checkout installed with `uv run` does not depend on Cinnamon inheriting your shell `PATH`.
-
-It also removes the old pre-release desktop startup file named `cinnamon-panel-anchor.desktop` if that file exists.
-
-Enable and disable commands are also available:
-
-```bash
-uv run cinnamon-panel-anchor enable-applet --json
-uv run cinnamon-panel-anchor disable-applet --json
-uv run cinnamon-panel-anchor uninstall-applet --json
-```
-
-The applet starts with Cinnamon because Cinnamon stores it in `enabled-applets`.
+The applet backend launcher points at the persistent extracted `src/` directory. It does not reference a temporary download directory.
 
 Restart Cinnamon if the applet list does not refresh:
 
-```bash
+```text
 Alt+F2
 r
 Enter
 ```
 
-## Validate Backend Commands
+## First Run
+
+1. Arrange your Cinnamon panels where you want them.
+2. Open the Cinnamon Panel Anchor applet.
+3. Choose **Save Current Layout**.
+4. Use **Restore Saved Layout** after monitor index drift.
+
+## Release Commands
 
 ```bash
-uv run cinnamon-panel-anchor status --json
-uv run cinnamon-panel-anchor diagnose --json
-uv run cinnamon-panel-anchor restore --json --dry-run
+cinnamon-panel-anchor status --json
+cinnamon-panel-anchor diagnose --json
+cinnamon-panel-anchor restore --json --dry-run
+cinnamon-panel-anchor disable-applet --json
+cinnamon-panel-anchor uninstall-applet --json
 ```
+
+## Source Checkout
+
+Source checkout installs are for development and packaging. Use `/usr/bin/python3` on Linux Mint so the virtual environment matches the system PyGObject extension ABI.
+
+```bash
+git clone https://github.com/CruxExperts/cinnamon-panel-anchor.git
+cd cinnamon-panel-anchor
+uv sync --python /usr/bin/python3
+uv run pytest
+uv run cinnamon-panel-anchor --help
+uv run cinnamon-panel-anchor install-applet --enable
+```
+
+Without `--backend-source`, `install-applet` preserves source-checkout behavior and writes a backend launcher for the Python interpreter used during installation.
 
 ## Export Spices Layout
 
@@ -63,4 +78,4 @@ uv run cinnamon-panel-anchor restore --json --dry-run
 uv run cinnamon-panel-anchor export-spice dist
 ```
 
-The export contains metadata and files, but no final `screenshot.png` until a real Cinnamon screenshot is captured.
+The export contains metadata and files, but no final `screenshot.png` until a real Cinnamon/X11 screenshot is captured.

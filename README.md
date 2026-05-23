@@ -2,15 +2,15 @@
 
 ![Cinnamon Panel Anchor logo](docs/assets/brand/panel-anchor-logo.svg)
 
-![Cinnamon Panel Anchor hero](docs/assets/readme/hero.png)
+![Generated Cinnamon Panel Anchor hero mockup](docs/assets/readme/hero.png)
+
+Generated visual, not a real Cinnamon screenshot.
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-16324f)](pyproject.toml)
 [![Desktop](https://img.shields.io/badge/Linux%20Mint-Cinnamon%20X11-47b39c)](docs/install.md)
 [![License](https://img.shields.io/badge/license-MIT-16324f)](LICENSE)
 
-Cinnamon Panel Anchor v0.2.1 is a native Cinnamon applet backed by a small Python utility. It keeps Cinnamon panels attached to the monitor connector and edge you chose, even when XRandR monitor indexes change after login, dock, wake, or hotplug events.
-
-The applet is the resident UI and controller. The CLI remains backend, installer, diagnostics, and release tooling.
+Cinnamon Panel Anchor v0.2.2 keeps Linux Mint Cinnamon/X11 panels attached to the monitor connector and edge you saved. It fixes Cinnamon panel drift caused by monitor index changes without changing your primary monitor.
 
 Public applet UUID: `cinnamon-panel-anchor@cruxexperts.com`.
 
@@ -18,41 +18,78 @@ Project repository: https://github.com/CruxExperts/cinnamon-panel-anchor
 
 ## Problem
 
-Linux Mint Cinnamon stores panel placement by monitor index, but XRandR monitor indexes are not stable. A laptop panel, dock, HDMI monitor, or wake-from-sleep event can reorder displays, which can leave your Cinnamon panel on the wrong screen or edge even though your physical monitor setup did not really change.
+Cinnamon stores panel placement by monitor index. XRandR monitor indexes can change after login, wake, dock, HDMI hotplug, or laptop lid changes. When that happens, the panel can move to the wrong screen or edge even though your physical monitor setup is the same.
 
-Common workarounds force a primary monitor with `xrandr --primary`, but that changes display preference to solve a panel-placement problem. Cinnamon Panel Anchor solves the narrower problem directly: it remembers the monitor connector and panel edge you intended, then restores Cinnamon's panel setting when monitor indexes drift.
+Forcing a primary monitor with `xrandr --primary` solves a different problem and changes display preference. Cinnamon Panel Anchor restores only Cinnamon panel placement.
 
-## What It Does
+## Solution
 
 1. Reads Cinnamon's `org.cinnamon panels-enabled` entries.
 2. Maps Cinnamon monitor indexes to stable XRandR connector names.
 3. Saves each panel as connector plus edge.
-4. Shows status and one clear next action in a Cinnamon panel applet.
-5. Restores only Cinnamon panel placement when the saved connector is found at a different index.
+4. Shows status and actions in a native Cinnamon panel applet.
+5. Restores Cinnamon panel placement when the saved connector appears at a different index.
 
-## Features
+## Install
 
-- Native Cinnamon panel applet with protected, working, attention, and error states.
-- Custom panel-anchor logo and state icons, so the panel icon is recognizable instead of a generic theme checkmark.
-- Guided status popup with a concise layout summary, one obvious next action, and compact secondary actions.
-- Actions for refresh, save current layout, restore saved layout, display settings, diagnostics copy, and applet settings.
-- Explicit lifecycle controls: **Quit for Session** hides the applet until Cinnamon reloads; **Disable Applet** removes the persistent Cinnamon enabled-applet entry.
-- JSON backend commands for applet integration: `status`, `capture`, `restore`, `diagnose`, `disable-applet`, and `log-event`.
-- Local diagnostic log at `$XDG_STATE_HOME/cinnamon-panel-anchor/debug.jsonl` with the latest 1000 records retained.
-- Source installer and Cinnamon Spices export tooling.
-- No display-primary changes. The project never calls `xrandr --primary`.
+The release installer is checksum-verified. It downloads the versioned installer asset, verifies the installer SHA256 before execution, then the installer verifies the versioned app bundle before extracting it.
 
-## Screenshots And Graphics
+```bash
+tmp="$(mktemp)"
+curl -fL --proto '=https' --tlsv1.2 -o "$tmp" https://github.com/CruxExperts/cinnamon-panel-anchor/releases/download/v0.2.2/install-cinnamon-panel-anchor-0.2.2.sh
+printf '%s  %s\n' '9f64c4079e51fb1dc7d8994e81adb15832e67444e8f96f1d65f068a279dda0dc' "$tmp" | sha256sum -c - && sh "$tmp"
+rm -f "$tmp"
+```
 
-![Generated dashboard mockup](docs/assets/readme/dashboard-mockup.png)
+The release install writes:
 
-Generated mockup for development documentation. Replace with a real Cinnamon screenshot before Spices submission.
+```text
+~/.local/share/cinnamon-panel-anchor/versions/0.2.2/
+~/.local/share/cinnamon-panel-anchor/current
+~/.local/bin/cinnamon-panel-anchor
+~/.local/share/cinnamon/applets/cinnamon-panel-anchor@cruxexperts.com/
+```
+
+It does not require `sudo`.
+
+## First Run
+
+1. Arrange your Cinnamon panels where you want them.
+2. Install and enable the applet with the release command above.
+3. Open the Cinnamon Panel Anchor applet from the Cinnamon panel.
+4. Choose **Save Current Layout**.
+5. Use **Restore Saved Layout** after monitor index drift, or let the applet surface attention states.
+
+## What Changes
+
+- Installs a Cinnamon applet under your user data directory.
+- Installs a user launcher at `~/.local/bin/cinnamon-panel-anchor`.
+- Saves panel anchors under your normal XDG config/state paths.
+- Removes the old pre-release `cinnamon-panel-anchor.desktop` autostart file if present.
+
+## What Does Not Change
+
+- No `sudo`.
+- No system files.
+- No hidden background process as the default path.
+- No display primary changes. The project never calls `xrandr --primary`.
+- No Wayland support in this release; Linux Mint Cinnamon on X11 is the target.
+
+## Visuals
+
+![Generated applet popup mockup](docs/assets/readme/dashboard-mockup.png)
+
+Generated mockup, not a real Cinnamon screenshot.
 
 ![Generated notification mockup](docs/assets/readme/notification-mockup.png)
 
-Additional project-owned graphics live in [docs/assets](docs/assets/README.md), including the social preview, logo, icon, and monitor-drift diagrams.
+Generated mockup, not a real Cinnamon screenshot.
 
-## Install From Source
+Additional project-owned graphics and provenance live in [docs/assets](docs/assets/README.md). Generated images are tracked in [docs/assets/manifest.json](docs/assets/manifest.json). Do not submit generated mockups as Cinnamon Spices screenshots.
+
+## Source Checkout
+
+Source installs are for development and packaging work. Use `/usr/bin/python3` on Linux Mint so the virtual environment matches the system PyGObject extension ABI.
 
 ```bash
 git clone https://github.com/CruxExperts/cinnamon-panel-anchor.git
@@ -62,31 +99,22 @@ uv run pytest
 uv run cinnamon-panel-anchor install-applet --enable
 ```
 
-Use `/usr/bin/python3` on Linux Mint so the virtual environment matches the system PyGObject extension ABI. The runtime uses Cinnamon's system Gio bindings; no GTK Python wheels are vendored.
-
-`install-applet` copies the applet and writes a small backend launcher inside the installed applet directory so Cinnamon can call the same Python environment used for installation.
-
-## First Run
-
-1. Arrange your Cinnamon panels where you want them.
-2. Install and enable the applet:
-
-   ```bash
-   uv run cinnamon-panel-anchor install-applet --enable
-   ```
-
-3. Open the applet from the Cinnamon panel.
-4. Choose **Save Current Layout**.
-5. Use **Restore Saved Layout** after monitor index drift or let the applet surface attention states.
-
 ## Backend CLI
+
+Release install:
+
+```bash
+cinnamon-panel-anchor status --json
+cinnamon-panel-anchor capture --json
+cinnamon-panel-anchor restore --json --dry-run
+cinnamon-panel-anchor restore --json
+cinnamon-panel-anchor diagnose --json
+```
+
+Source checkout:
 
 ```bash
 uv run cinnamon-panel-anchor status --json
-uv run cinnamon-panel-anchor capture --json
-uv run cinnamon-panel-anchor restore --json --dry-run
-uv run cinnamon-panel-anchor restore --json
-uv run cinnamon-panel-anchor diagnose --json
 uv run cinnamon-panel-anchor export-spice dist
 ```
 
@@ -102,24 +130,16 @@ uv run cinnamon-panel-anchor export-spice dist
 - [Versioning](docs/VERSIONING.md)
 - [Publishing checklist](docs/PUBLISHING_CHECKLIST.md)
 
-## Release
+## Maintainer And Release
 
-Current release: `v0.2.1`.
+Current release: `v0.2.2`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.
-
-## How It Works
-
-![Monitor index drift diagram](docs/assets/diagrams/monitor-index-drift.svg)
-
-The backend reads Cinnamon's `org.cinnamon panels-enabled` entries and maps their monitor indexes through `xrandr --listmonitors`. Saved anchors store connector plus edge, not transient monitor index.
-
-## Maintainer
 
 Copyright 2026 Crux Experts LLC.
 
 Maintainer: Slavic Kozyuk.
 
-GitHub: https://github.com/CruxExperts/cinnamon-panel-anchor
+GitHub: https://github.com/CruxExperts
 
 Company: https://www.cruxexperts.com

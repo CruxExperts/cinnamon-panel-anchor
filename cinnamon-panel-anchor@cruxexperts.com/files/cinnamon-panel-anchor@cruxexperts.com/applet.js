@@ -8,7 +8,7 @@ const GLib = imports.gi.GLib;
 const St = imports.gi.St;
 
 const UUID = "cinnamon-panel-anchor@cruxexperts.com";
-const VERSION = "0.2.1";
+const VERSION = "0.2.2";
 const PROJECT_URL = "https://github.com/CruxExperts/cinnamon-panel-anchor";
 const APPLET_PATH = imports.ui.appletManager.appletMeta[UUID].path;
 const AppletManager = imports.ui.appletManager;

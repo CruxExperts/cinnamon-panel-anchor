@@ -24,7 +24,7 @@ def check(condition: bool, message: str, failures: list[str]) -> None:
 def main() -> int:
     failures: list[str] = []
     version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
-    check(version == "0.2.1", "VERSION must be 0.2.1", failures)
+    check(version == "0.2.2", "VERSION must be 0.2.2", failures)
 
     for path in [
         ROOT / "src/cinnamon_panel_anchor/applet" / APPLET_UUID / "metadata.json",
@@ -37,7 +37,7 @@ def main() -> int:
             check(data["version"] == version, f"{path.relative_to(ROOT)} version mismatch", failures)
 
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    check("0.2.1" in readme, "README must mention visible version 0.2.1", failures)
+    check("0.2.2" in readme, "README must mention visible version 0.2.2", failures)
     check("Crux Experts LLC" in readme, "README must include Crux Experts LLC", failures)
     check("Slavic Kozyuk" in readme, "README must include maintainer", failures)
     check("https://github.com/CruxExperts" in readme, "README must include GitHub profile", failures)

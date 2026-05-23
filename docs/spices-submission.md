@@ -12,7 +12,7 @@ The directory name, `metadata.json`, installer, tests, docs, and export layout m
 
 ## Export Layout
 
-Run:
+Run from a source checkout:
 
 ```bash
 uv run cinnamon-panel-anchor export-spice dist
@@ -35,16 +35,19 @@ dist/cinnamon-panel-anchor@cruxexperts.com/
 
 Do not submit generated mockups as final Spices screenshots. Add `screenshot.png` only after capturing the running applet on Linux Mint Cinnamon/X11.
 
+Generated documentation images are recorded in `docs/assets/manifest.json` with `real_cinnamon_screenshot: false`.
+
 ## Validation Checklist
 
 - `uv run python tools/version_sync.py --check` passes.
 - `uv run python tools/validate.py` passes.
 - `uv run pytest` passes.
+- `git diff --check` passes.
 - JSON files validate.
 - README image links resolve to committed files.
 - UUID is consistent across code, docs, metadata, and export layout.
-- Version is synchronized to `0.2.1` from `VERSION`.
+- Version is synchronized to `0.2.2` from `VERSION`.
 - Startup text describes Cinnamon enabled applet state as the normal startup path.
 - **Quit for Session** and **Disable Applet** are documented as temporary versus persistent actions.
 - Source does not mutate the XRandR primary monitor.
-- Real Cinnamon screenshot exists for submission.
+- Real Cinnamon screenshot exists before submitting `screenshot.png`.

@@ -1,0 +1,34 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv run python tools/version_sync.py --check
+      - run: uv run python tools/validate.py
+      - run: uv run pytest
+      - run: git diff --check
+      - run: uv run python tools/build_release_assets.py --output-dir dist/release-assets
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(cat VERSION)"
+          test "${GITHUB_REF_NAME}" = "v${version}"
+          gh release view "v${version}" >/dev/null 2>&1 || gh release create "v${version}" --title "Cinnamon Panel Anchor v${version}" --notes-file CHANGELOG.md --verify-tag
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(cat VERSION)"
+          gh release upload "v${version}" dist/release-assets/* --clobber
