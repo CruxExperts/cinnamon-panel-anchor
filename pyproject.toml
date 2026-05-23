@@ -18,6 +18,12 @@ classifiers = [
 ]
 dependencies = []
 
+[project.urls]
+Homepage = "https://github.com/CruxExperts/cinnamon-panel-anchor"
+Repository = "https://github.com/CruxExperts/cinnamon-panel-anchor"
+Issues = "https://github.com/CruxExperts/cinnamon-panel-anchor/issues"
+Changelog = "https://github.com/CruxExperts/cinnamon-panel-anchor/blob/main/CHANGELOG.md"
+
 [project.scripts]
 cinnamon-panel-anchor = "cinnamon_panel_anchor.cli:main"
 

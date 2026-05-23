@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.1 - 2026-05-22
 
 - Reworked the project direction around a native Cinnamon applet with UUID `cinnamon-panel-anchor@cruxexperts.com`.
 - Added applet package assets, settings schema, stylesheet, and installer/export commands.

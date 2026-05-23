@@ -14,6 +14,22 @@ The applet is the resident UI and controller. The CLI remains backend, installer
 
 Public applet UUID: `cinnamon-panel-anchor@cruxexperts.com`.
 
+Project repository: https://github.com/CruxExperts/cinnamon-panel-anchor
+
+## Problem
+
+Linux Mint Cinnamon stores panel placement by monitor index, but XRandR monitor indexes are not stable. A laptop panel, dock, HDMI monitor, or wake-from-sleep event can reorder displays, which can leave your Cinnamon panel on the wrong screen or edge even though your physical monitor setup did not really change.
+
+Common workarounds force a primary monitor with `xrandr --primary`, but that changes display preference to solve a panel-placement problem. Cinnamon Panel Anchor solves the narrower problem directly: it remembers the monitor connector and panel edge you intended, then restores Cinnamon's panel setting when monitor indexes drift.
+
+## What It Does
+
+1. Reads Cinnamon's `org.cinnamon panels-enabled` entries.
+2. Maps Cinnamon monitor indexes to stable XRandR connector names.
+3. Saves each panel as connector plus edge.
+4. Shows status and one clear next action in a Cinnamon panel applet.
+5. Restores only Cinnamon panel placement when the saved connector is found at a different index.
+
 ## Features
 
 - Native Cinnamon panel applet with protected, working, attention, and error states.
@@ -26,7 +42,7 @@ Public applet UUID: `cinnamon-panel-anchor@cruxexperts.com`.
 - Source installer and Cinnamon Spices export tooling.
 - No display-primary changes. The project never calls `xrandr --primary`.
 
-## Dashboard Preview
+## Screenshots And Graphics
 
 ![Generated dashboard mockup](docs/assets/readme/dashboard-mockup.png)
 
@@ -34,9 +50,13 @@ Generated mockup for development documentation. Replace with a real Cinnamon scr
 
 ![Generated notification mockup](docs/assets/readme/notification-mockup.png)
 
+Additional project-owned graphics live in [docs/assets](docs/assets/README.md), including the social preview, logo, icon, and monitor-drift diagrams.
+
 ## Install From Source
 
 ```bash
+git clone https://github.com/CruxExperts/cinnamon-panel-anchor.git
+cd cinnamon-panel-anchor
 uv sync --python /usr/bin/python3
 uv run pytest
 uv run cinnamon-panel-anchor install-applet --enable
@@ -82,6 +102,12 @@ uv run cinnamon-panel-anchor export-spice dist
 - [Versioning](docs/VERSIONING.md)
 - [Publishing checklist](docs/PUBLISHING_CHECKLIST.md)
 
+## Release
+
+Current release: `v0.2.1`.
+
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
+
 ## How It Works
 
 ![Monitor index drift diagram](docs/assets/diagrams/monitor-index-drift.svg)
@@ -94,6 +120,6 @@ Copyright 2026 Crux Experts LLC.
 
 Maintainer: Slavic Kozyuk.
 
-GitHub: https://github.com/CruxExperts
+GitHub: https://github.com/CruxExperts/cinnamon-panel-anchor
 
 Company: https://www.cruxexperts.com
