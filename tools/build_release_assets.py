@@ -28,23 +28,34 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def bundle_members() -> list[Path]:
-    tracked = [
-        Path(line)
-        for line in subprocess.run(
+def bundle_members() -> list[tuple[Path, int]]:
+    tracked = []
+    for line in subprocess.run(
+        ["git", "ls-files", "--stage"],
+        cwd=ROOT,
+        check=True,
+        stdout=subprocess.PIPE,
+        text=True,
+    ).stdout.splitlines():
+        mode, _, _, name = line.split(maxsplit=3)
+        tracked.append((Path(name), int(mode[-3:], 8)))
+    if not tracked:
+        tracked = [
+            (Path(line), 0o644)
+            for line in subprocess.run(
             ["git", "ls-files"],
             cwd=ROOT,
             check=True,
             stdout=subprocess.PIPE,
             text=True,
-        ).stdout.splitlines()
-        if line
-    ]
+            ).stdout.splitlines()
+            if line
+        ]
     included_files = {"VERSION", "LICENSE", "pyproject.toml"}
     included_prefixes = ("src/",)
     return [
-        path
-        for path in tracked
+        (path, mode)
+        for path, mode in tracked
         if path.as_posix() in included_files
         or any(path.as_posix().startswith(prefix) for prefix in included_prefixes)
     ]
@@ -56,9 +67,10 @@ def write_bundle(output_dir: Path, release_version: str) -> Path:
     root_name = f"cinnamon-panel-anchor-{release_version}"
     tar_bytes = BytesIO()
     with tarfile.open(fileobj=tar_bytes, mode="w") as tar:
-        for relative in bundle_members():
+        for relative, mode in bundle_members():
             source = ROOT / relative
             info = tar.gettarinfo(source, arcname=f"{root_name}/{relative.as_posix()}")
+            info.mode = mode
             info.uid = 0
             info.gid = 0
             info.uname = ""
