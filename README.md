@@ -37,7 +37,7 @@ The release installer is checksum-verified. It downloads the versioned installer
 ```bash
 tmp="$(mktemp)"
 curl -fL --proto '=https' --tlsv1.2 -o "$tmp" https://github.com/CruxExperts/cinnamon-panel-anchor/releases/download/v0.2.2/install-cinnamon-panel-anchor-0.2.2.sh
-printf '%s  %s\n' '9f64c4079e51fb1dc7d8994e81adb15832e67444e8f96f1d65f068a279dda0dc' "$tmp" | sha256sum -c - && sh "$tmp"
+printf '%s  %s\n' 'e524cefa6f0f5b70aeaf811433b3a6ca608206dab42a2a8a69844ed1c44eb859' "$tmp" | sha256sum -c - && sh "$tmp"
 rm -f "$tmp"
 ```
 

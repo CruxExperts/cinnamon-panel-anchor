@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import argparse
-import gzip
 import hashlib
 import shutil
 import stat
 import subprocess
 import tarfile
+import zlib
+from io import BytesIO
 from pathlib import Path
 
 
@@ -53,20 +54,35 @@ def write_bundle(output_dir: Path, release_version: str) -> Path:
     bundle_name = f"cinnamon-panel-anchor-{release_version}.tar.gz"
     bundle_path = output_dir / bundle_name
     root_name = f"cinnamon-panel-anchor-{release_version}"
-    with bundle_path.open("wb") as raw:
-        with gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as gz:
-            with tarfile.open(fileobj=gz, mode="w") as tar:
-                for relative in bundle_members():
-                    source = ROOT / relative
-                    info = tar.gettarinfo(source, arcname=f"{root_name}/{relative.as_posix()}")
-                    info.uid = 0
-                    info.gid = 0
-                    info.uname = ""
-                    info.gname = ""
-                    info.mtime = 0
-                    with source.open("rb") as handle:
-                        tar.addfile(info, handle)
+    tar_bytes = BytesIO()
+    with tarfile.open(fileobj=tar_bytes, mode="w") as tar:
+        for relative in bundle_members():
+            source = ROOT / relative
+            info = tar.gettarinfo(source, arcname=f"{root_name}/{relative.as_posix()}")
+            info.uid = 0
+            info.gid = 0
+            info.uname = ""
+            info.gname = ""
+            info.mtime = 0
+            with source.open("rb") as handle:
+                tar.addfile(info, handle)
+    bundle_path.write_bytes(deterministic_gzip(tar_bytes.getvalue()))
     return bundle_path
+
+
+def deterministic_gzip(data: bytes) -> bytes:
+    output = bytearray(b"\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff")
+    for offset in range(0, len(data), 65535):
+        block = data[offset : offset + 65535]
+        final = 1 if offset + 65535 >= len(data) else 0
+        output.append(final)
+        size = len(block)
+        output.extend(size.to_bytes(2, "little"))
+        output.extend((size ^ 0xFFFF).to_bytes(2, "little"))
+        output.extend(block)
+    output.extend((zlib.crc32(data) & 0xFFFFFFFF).to_bytes(4, "little"))
+    output.extend((len(data) & 0xFFFFFFFF).to_bytes(4, "little"))
+    return bytes(output)
 
 
 def render_installer(output_dir: Path, release_version: str, bundle_hash: str) -> Path:
