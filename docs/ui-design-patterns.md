@@ -12,15 +12,15 @@ Use a guided status popup. The first visible content should explain the current 
 
 The visual metaphor is a panel-anchor glyph: a small Cinnamon panel segment pinned to a connector point. Use that metaphor for applet identity and applet state icons so the panel icon remains recognizable at a glance.
 
-Invalid actions should stay visible but disabled. A disabled restore action with a short reason is clearer than hiding restore when no anchors exist, because it teaches what must happen next.
+Actions that are not relevant to the current state should stay out of the normal popup path. If an invalid action must remain visible, show it disabled with a short reason.
 
 ## Interaction Patterns
 
 - Show one clear status header: protected, working, needs attention, or error.
 - Present one primary next action based on the current state.
-- Group secondary actions after the primary action: refresh, capture, restore, keep current move, display settings, diagnostics, and applet settings.
+- Group secondary actions after the primary action: refresh, save current layout, restore saved layout, display settings, diagnostics, and applet settings.
 - Add short action hints where command names need context.
-- Keep invalid actions visible and disable them with a reason.
+- Keep the normal path focused on relevant actions.
 - Prefer direct state text over raw backend terms in the popup. Raw details belong in diagnostics.
 
 ## Icon Rules

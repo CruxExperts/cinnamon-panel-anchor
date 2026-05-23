@@ -4,8 +4,6 @@
 
 Cinnamon Panel Anchor is GUI-first. The Cinnamon applet is the resident controller, status surface, and action launcher. The Python CLI is backend, installer, diagnostics, and packaging support tooling.
 
-The default release path is not an invisible autostart watcher. Legacy watcher commands remain available for migration and development only.
-
 The applet popup should follow the documented [UI design patterns](ui-design-patterns.md): a guided status header, one primary next action, grouped secondary actions, disabled reasons for invalid actions, and attention-only notifications.
 
 ## Applet To Backend Contract
@@ -18,9 +16,6 @@ cinnamon-panel-anchor capture --json
 cinnamon-panel-anchor restore --json
 cinnamon-panel-anchor restore --json --dry-run
 cinnamon-panel-anchor diagnose --json
-cinnamon-panel-anchor autostart-status --json
-cinnamon-panel-anchor install-autostart --json
-cinnamon-panel-anchor uninstall-autostart --json
 cinnamon-panel-anchor disable-applet --json
 cinnamon-panel-anchor log-event --json --event applet-action
 ```
@@ -33,7 +28,7 @@ ok, severity, summary, monitors, panels, anchors, pending_decision, plan, messag
 
 Mutating commands are serialized with a process-safe lock. Lock refusal exits with code `3`; JSON mode returns `ok: false`, `severity: "warning"`, and lock metadata in `error_details`.
 
-Read-only commands such as `status`, `diagnose`, `autostart-status`, `export-spice`, and `log-event` do not take the mutating lock.
+Read-only commands such as `status`, `diagnose`, `export-spice`, and `log-event` do not take the mutating lock.
 
 ## Logging
 
@@ -47,7 +42,7 @@ The backend retains the latest 1000 records. Records include UTC timestamp, leve
 
 ## Startup
 
-Cinnamon's `enabled-applets` setting is the normal session/startup mechanism. The legacy XDG autostart watcher is optional, off by default, and controlled by `install-autostart`, `uninstall-autostart`, or the applet setting named **Run legacy autostart watcher at login**.
+Cinnamon's `enabled-applets` setting is the normal session/startup mechanism.
 
 ## Cinnamon Panel Setting
 

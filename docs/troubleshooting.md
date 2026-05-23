@@ -51,20 +51,6 @@ uv run cinnamon-panel-anchor disable-applet --json
 
 when you want the persistent Cinnamon enabled-applet entry removed.
 
-## Legacy Watcher Starts Unexpectedly
-
-Check the optional XDG autostart watcher:
-
-```bash
-uv run cinnamon-panel-anchor autostart-status --json
-```
-
-Turn it off from applet settings or run:
-
-```bash
-uv run cinnamon-panel-anchor uninstall-autostart --json
-```
-
 ## Inspect Local Logs
 
 The latest 1000 diagnostic records are stored in:

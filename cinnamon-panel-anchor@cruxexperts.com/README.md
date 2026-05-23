@@ -6,6 +6,6 @@ This checked-in layout mirrors the Cinnamon Spices export shape. Generated mocku
 
 The applet uses a custom panel-anchor icon family in `files/cinnamon-panel-anchor@cruxexperts.com/icons/` rather than generic desktop status icons.
 
-Startup uses Cinnamon's enabled applet list. **Quit for Session** is temporary; **Disable Applet** removes the persistent Cinnamon enabled-applet entry. The legacy XDG autostart watcher is optional and off by default.
+Startup uses Cinnamon's enabled applet list. **Quit for Session** is temporary; **Disable Applet** removes the persistent Cinnamon enabled-applet entry.
 
 Maintainer: Slavic Kozyuk, Crux Experts LLC.

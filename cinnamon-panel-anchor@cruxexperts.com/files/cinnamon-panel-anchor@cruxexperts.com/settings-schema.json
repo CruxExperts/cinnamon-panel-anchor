@@ -22,15 +22,6 @@
     "default": false,
     "description": "Restore automatically when drift is detected"
   },
-  "section-startup": {
-    "type": "section",
-    "description": "Startup"
-  },
-  "legacy-autostart-watcher": {
-    "type": "switch",
-    "default": false,
-    "description": "Run legacy autostart watcher at login"
-  },
   "section-debug": {
     "type": "section",
     "description": "Diagnostics"

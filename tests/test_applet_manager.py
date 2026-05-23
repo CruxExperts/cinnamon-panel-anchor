@@ -49,6 +49,7 @@ def test_enable_applet_appends_after_existing_right_panel_entries():
 
 def test_install_applet_copies_packaged_assets(monkeypatch, tmp_path):
     monkeypatch.setattr(applet_manager, "cinnamon_applets_dir", lambda: tmp_path)
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
 
     path = applet_manager.install_applet()
 
@@ -59,6 +60,18 @@ def test_install_applet_copies_packaged_assets(monkeypatch, tmp_path):
     assert launcher.exists()
     assert launcher.stat().st_mode & 0o111
     assert "-m cinnamon_panel_anchor.cli" in launcher.read_text(encoding="utf-8")
+
+
+def test_install_applet_removes_pre_release_autostart_file(monkeypatch, tmp_path):
+    monkeypatch.setattr(applet_manager, "cinnamon_applets_dir", lambda: tmp_path / "applets")
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    legacy_path = applet_manager.legacy_autostart_path()
+    legacy_path.parent.mkdir(parents=True)
+    legacy_path.write_text("[Desktop Entry]\nExec=cinnamon-panel-anchor watch\n", encoding="utf-8")
+
+    applet_manager.install_applet()
+
+    assert not legacy_path.exists()
 
 
 def test_export_spice_writes_expected_layout(tmp_path):

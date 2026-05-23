@@ -151,14 +151,53 @@ def test_applet_lifecycle_and_settings_controls_are_declared():
         "Quit for Session",
         "Disable Applet",
         "disable-applet",
-        "autostart-status",
-        "Version \" + VERSION",
+        "PROJECT_URL",
+        "https://github.com/CruxExperts/cinnamon-panel-anchor",
+        "Save Current Layout",
+        "Restore Saved Layout",
+        "Keep This Layout",
     ):
         assert text in applet
+    for text in (
+        "legacy-autostart-watcher",
+        "autostart-status",
+        "install-autostart",
+        "uninstall-autostart",
+        "Keep Current Move",
+        "Version \" + VERSION",
+        "_statusLine(\"Version\"",
+    ):
+        assert text not in applet
     assert schema["show-notifications"]["type"] == "switch"
     assert schema["restore-automatically"]["type"] == "switch"
-    assert schema["legacy-autostart-watcher"]["default"] is False
+    assert "legacy-autostart-watcher" not in schema
     assert schema["debug-logging"]["default"] is True
+
+
+def test_public_docs_do_not_advertise_legacy_autostart_workflows():
+    docs = [
+        ROOT / "README.md",
+        ROOT / "CHANGELOG.md",
+        ROOT / UUID / "README.md",
+        *sorted((ROOT / "docs").glob("*.md")),
+    ]
+    forbidden = (
+        "legacy-autostart-watcher",
+        "autostart-status",
+        "install-autostart",
+        "uninstall-autostart",
+        "legacy XDG autostart watcher",
+        "autostart watcher",
+        "Run legacy autostart watcher",
+        "XDG autostart",
+    )
+    offenders = []
+    for path in docs:
+        text = path.read_text(encoding="utf-8")
+        for value in forbidden:
+            if value in text:
+                offenders.append(f"{path.relative_to(ROOT)}: {value}")
+    assert offenders == []
 
 
 def test_applet_uses_project_icon_assets_not_generic_status_icons():

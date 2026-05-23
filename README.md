@@ -18,11 +18,10 @@ Public applet UUID: `cinnamon-panel-anchor@cruxexperts.com`.
 
 - Native Cinnamon panel applet with protected, working, attention, and error states.
 - Custom panel-anchor logo and state icons, so the panel icon is recognizable instead of a generic theme checkmark.
-- Dashboard for health, saved anchors, current monitors, panel entries, pending decisions, and diagnostics.
-- Actions for refresh, capture, restore, keep-current, display settings, diagnostics copy, and applet settings.
+- Guided status popup with a concise layout summary, one obvious next action, and compact secondary actions.
+- Actions for refresh, save current layout, restore saved layout, display settings, diagnostics copy, and applet settings.
 - Explicit lifecycle controls: **Quit for Session** hides the applet until Cinnamon reloads; **Disable Applet** removes the persistent Cinnamon enabled-applet entry.
-- Optional legacy XDG autostart watcher, off by default and controlled separately from Cinnamon's normal applet startup.
-- JSON backend commands for applet integration: `status`, `capture`, `restore`, `diagnose`, `autostart-status`, `install-autostart`, `uninstall-autostart`, `disable-applet`, and `log-event`.
+- JSON backend commands for applet integration: `status`, `capture`, `restore`, `diagnose`, `disable-applet`, and `log-event`.
 - Local diagnostic log at `$XDG_STATE_HOME/cinnamon-panel-anchor/debug.jsonl` with the latest 1000 records retained.
 - Source installer and Cinnamon Spices export tooling.
 - No display-primary changes. The project never calls `xrandr --primary`.
@@ -57,8 +56,8 @@ Use `/usr/bin/python3` on Linux Mint so the virtual environment matches the syst
    ```
 
 3. Open the applet from the Cinnamon panel.
-4. Choose **Capture Current Layout**.
-5. Use **Restore Saved Anchors** after monitor index drift or let the applet surface attention states.
+4. Choose **Save Current Layout**.
+5. Use **Restore Saved Layout** after monitor index drift or let the applet surface attention states.
 
 ## Backend CLI
 
@@ -69,14 +68,6 @@ uv run cinnamon-panel-anchor restore --json --dry-run
 uv run cinnamon-panel-anchor restore --json
 uv run cinnamon-panel-anchor diagnose --json
 uv run cinnamon-panel-anchor export-spice dist
-```
-
-Legacy autostart watcher commands remain available for development and migration, but they are not the default release path.
-
-```bash
-uv run cinnamon-panel-anchor autostart-status --json
-uv run cinnamon-panel-anchor install-autostart --json
-uv run cinnamon-panel-anchor uninstall-autostart --json
 ```
 
 ## Documentation

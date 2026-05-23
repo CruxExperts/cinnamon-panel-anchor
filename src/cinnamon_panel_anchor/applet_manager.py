@@ -9,11 +9,13 @@ from importlib import resources
 from pathlib import Path
 
 from .settings import CinnamonSettings, CinnamonSettingsError
+from .storage import xdg_config_home
 from .version import get_version
 
 
 APPLET_UUID = "cinnamon-panel-anchor@cruxexperts.com"
 APPLET_ENTRY = f"panel1:right:0:{APPLET_UUID}:0:orient"
+LEGACY_AUTOSTART_DESKTOP_ID = "cinnamon-panel-anchor.desktop"
 
 
 def cinnamon_applets_dir() -> Path:
@@ -48,7 +50,20 @@ def install_applet() -> Path:
     destination = installed_applet_path()
     _copy_resource_tree(applet_resource_root(), destination)
     _write_backend_launcher(destination)
+    remove_legacy_autostart_file()
     return destination
+
+
+def legacy_autostart_path() -> Path:
+    return xdg_config_home() / "autostart" / LEGACY_AUTOSTART_DESKTOP_ID
+
+
+def remove_legacy_autostart_file() -> bool:
+    path = legacy_autostart_path()
+    if not path.exists():
+        return False
+    path.unlink()
+    return True
 
 
 def _write_backend_launcher(destination: Path) -> Path:

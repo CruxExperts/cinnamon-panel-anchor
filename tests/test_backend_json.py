@@ -40,7 +40,7 @@ def test_capture_json_saves_anchors_and_state(monkeypatch, capsys):
     monkeypatch.setattr(cli, "CinnamonSettings", FakeSettings)
     monkeypatch.setattr(cli, "list_monitors", lambda: ([Monitor(0, "HDMI-1", True, "1920x1080+0+0")], None))
     monkeypatch.setattr(cli, "save_anchors", lambda anchors: saved.setdefault("anchors", anchors))
-    monkeypatch.setattr(cli, "load_state", lambda: {})
+    monkeypatch.setattr(cli, "load_state", lambda: {"pending_decision": {"reason": "manual move"}})
     monkeypatch.setattr(cli, "save_state", lambda state: saved.setdefault("state", state))
 
     result = cli.cmd_capture_json(argparse.Namespace(json=True))
@@ -49,6 +49,7 @@ def test_capture_json_saves_anchors_and_state(monkeypatch, capsys):
     assert result == 0
     assert payload["ok"] is True
     assert saved["anchors"] == [Anchor("1", "HDMI-1", "bottom")]
+    assert saved["state"]["pending_decision"] is None
     assert "last_topology" in saved["state"]
 
 
@@ -66,6 +67,24 @@ def test_restore_json_dry_run_reports_plan(monkeypatch, capsys):
     assert FakeSettings.writes == []
     assert payload["plan"]["changed"] is True
     assert payload["plan"]["desired_panels"] == ["1:1:bottom"]
+
+
+def test_restore_json_clears_pending_decision(monkeypatch, capsys):
+    FakeSettings.writes = []
+    saved = {}
+    monkeypatch.setattr(cli, "CinnamonSettings", FakeSettings)
+    monkeypatch.setattr(cli, "list_monitors", lambda: ([Monitor(1, "HDMI-1", True, "1920x1080+0+0")], None))
+    monkeypatch.setattr(cli, "load_anchors", lambda: [Anchor("1", "HDMI-1", "bottom")])
+    monkeypatch.setattr(cli, "load_state", lambda: {"pending_decision": {"reason": "manual move"}})
+    monkeypatch.setattr(cli, "save_state", lambda state: saved.setdefault("state", state))
+
+    result = cli.cmd_restore(argparse.Namespace(json=True, dry_run=False))
+    payload = _json_output(capsys)
+
+    assert result == 0
+    assert payload["pending_decision"] is None
+    assert saved["state"]["pending_decision"] is None
+    assert FakeSettings.writes == [["1:1:bottom"]]
 
 
 def test_diagnose_json_uses_standard_contract(monkeypatch, capsys):

@@ -44,7 +44,7 @@ Do not submit generated mockups as final Spices screenshots. Add `screenshot.png
 - README image links resolve to committed files.
 - UUID is consistent across code, docs, metadata, and export layout.
 - Version is synchronized to `0.2.1` from `VERSION`.
-- Startup text distinguishes Cinnamon enabled applet state from the optional legacy autostart watcher.
+- Startup text describes Cinnamon enabled applet state as the normal startup path.
 - **Quit for Session** and **Disable Applet** are documented as temporary versus persistent actions.
 - Source does not mutate the XRandR primary monitor.
 - Real Cinnamon screenshot exists for submission.

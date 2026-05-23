@@ -2,30 +2,28 @@
 
 Design intent for future UI changes is tracked in [UI design patterns](ui-design-patterns.md). This guide stays focused on user workflows.
 
-## Dashboard
+## Status Popup
 
-The Cinnamon applet is the primary interface. Its popup dashboard shows:
+The Cinnamon applet is the primary interface. Its popup shows:
 
-- Health: protected, working, attention, or error.
-- Saved anchors: panel connector and edge records captured from the current layout.
-- Current monitors: monitor indexes and connector names reported by XRandR.
-- Current panel entries: raw Cinnamon `panels-enabled` entries.
-- Pending decisions: manual moves that need a keep-or-restore choice.
-- Diagnostics summary: backend errors, missing Gio bindings, or XRandR mapping failures.
+- Current health: protected, working, attention, or error.
+- One primary next action for the current state.
+- A compact layout summary with saved layouts, monitors, panels, and any pending decision.
+- Secondary actions for refresh, display settings, diagnostics copy, and applet settings.
 
 The applet can be placed on top, bottom, left, or right Cinnamon panels.
 
-## Capture Current Layout
+## Save Current Layout
 
-Use **Capture Current Layout** after arranging panels where you want them. The backend stores each panel as connector plus edge.
+Use **Save Current Layout** after arranging panels where you want them. The backend stores each panel as connector plus edge.
 
-## Restore Saved Anchors
+## Restore Saved Layout
 
-Use **Restore Saved Anchors** when panels appear on the wrong monitor after login, wake, dock, or hotplug. Restore changes only Cinnamon panel placement.
+Use **Restore Saved Layout** when panels appear on the wrong monitor after login, wake, dock, or hotplug. Restore changes only Cinnamon panel placement.
 
-## Keep Current Move
+## Keep This Layout
 
-Use **Keep Current Move** when you intentionally moved a panel and want the new placement to become the saved anchor.
+Use **Keep This Layout** when the applet reports a pending manual-move decision and you want the current placement to become the saved layout.
 
 ## Notifications
 
@@ -45,8 +43,6 @@ Cinnamon's enabled applet list is the normal startup mechanism. If the applet is
 Use **Quit for Session** to hide and stop the applet only for the current Cinnamon session. This does not uninstall files and does not remove the persistent enabled applet entry.
 
 Use **Disable Applet** when you want the applet removed from Cinnamon's persistent `enabled-applets` list. It will not return next session unless you explicitly enable it again.
-
-The **Run legacy autostart watcher at login** setting controls the older XDG autostart watcher. It is off by default. Turning it off removes the desktop autostart file.
 
 ## Diagnostics Log
 

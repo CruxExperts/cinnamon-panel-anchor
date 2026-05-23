@@ -29,6 +29,8 @@ The applet is installed to:
 
 The install command also writes `cinnamon-panel-anchor-backend` into that directory. The applet uses this launcher first, so a source checkout installed with `uv run` does not depend on Cinnamon inheriting your shell `PATH`.
 
+It also removes the old pre-release desktop startup file named `cinnamon-panel-anchor.desktop` if that file exists.
+
 Enable and disable commands are also available:
 
 ```bash
@@ -37,19 +39,7 @@ uv run cinnamon-panel-anchor disable-applet --json
 uv run cinnamon-panel-anchor uninstall-applet --json
 ```
 
-The applet starts with Cinnamon because Cinnamon stores it in `enabled-applets`. Do not install the legacy XDG autostart watcher for normal applet startup.
-
-## Optional Legacy Autostart Watcher
-
-The legacy watcher remains available for compatibility and migration testing:
-
-```bash
-uv run cinnamon-panel-anchor autostart-status --json
-uv run cinnamon-panel-anchor install-autostart --json
-uv run cinnamon-panel-anchor uninstall-autostart --json
-```
-
-It is off by default. The applet settings switch named **Run legacy autostart watcher at login** creates or removes the desktop autostart file.
+The applet starts with Cinnamon because Cinnamon stores it in `enabled-applets`.
 
 Restart Cinnamon if the applet list does not refresh:
 

@@ -17,7 +17,6 @@ from .applet_manager import (
     installed_applet_path,
     uninstall_applet,
 )
-from .autostart import autostart_path, install_autostart, uninstall_autostart
 from .locking import CommandLock, LockRefused
 from .logging import error_details, log_path, write_log
 from .planner import (
@@ -131,6 +130,7 @@ def cmd_capture(_: argparse.Namespace) -> int:
     anchors = capture_anchors(panels, monitors)
     save_anchors(anchors)
     state = load_state()
+    state["pending_decision"] = None
     state["last_seen_panels"] = panel_values
     state["last_topology"] = topology_fingerprint(monitors)
     save_state(state)
@@ -151,6 +151,7 @@ def cmd_capture_json(args: argparse.Namespace) -> int:
         anchors = capture_anchors(parse_panels(panel_values), monitors)
         save_anchors(anchors)
         state = load_state()
+        state["pending_decision"] = None
         state["last_seen_panels"] = panel_values
         state["last_topology"] = topology_fingerprint(monitors)
         save_state(state)
@@ -265,6 +266,7 @@ def cmd_restore(args: argparse.Namespace) -> int:
     for note in plan.notes:
         print(note)
     if not plan.changed:
+        _clear_pending_decision(panel_values, monitors)
         print("panels already match saved anchors")
         return 0
     if args.dry_run:
@@ -277,6 +279,7 @@ def cmd_restore(args: argparse.Namespace) -> int:
         print(error, file=sys.stderr)
         return 2
     state = load_state()
+    state["pending_decision"] = None
     state["last_written_panels"] = desired_values
     state["last_seen_panels"] = desired_values
     state["last_topology"] = topology_fingerprint(monitors)
@@ -297,6 +300,7 @@ def _restore_json(
     plan_payload = None
     messages: list[str] = []
     ok = error is None
+    pending_decision = load_state().get("pending_decision")
     if ok:
         plan = plan_restore(parse_panels(panel_values), anchors, monitors)
         desired_values = format_panels(plan.desired)
@@ -309,14 +313,19 @@ def _restore_json(
                 error = write_error
             else:
                 state = load_state()
+                state["pending_decision"] = None
                 state["last_written_panels"] = desired_values
                 state["last_seen_panels"] = desired_values
                 state["last_topology"] = topology_fingerprint(monitors)
                 save_state(state)
+                pending_decision = None
                 messages.append("restored panel anchors")
         elif plan.changed:
             messages.append("restore plan prepared")
         else:
+            if not args.dry_run:
+                _clear_pending_decision(panel_values, monitors)
+                pending_decision = None
             messages.append("panels already match saved anchors")
     _json(
         _standard_payload(
@@ -326,13 +335,23 @@ def _restore_json(
             monitors=monitors,
             panels=panel_values,
             anchors=anchors,
-            pending_decision=load_state().get("pending_decision"),
+            pending_decision=pending_decision,
             plan=plan_payload,
             messages=messages,
             error=error,
         )
     )
     return 0 if ok else 2
+
+
+def _clear_pending_decision(panel_values: list[str], monitors: list[Any]) -> None:
+    state = load_state()
+    if state.get("pending_decision") is None:
+        return
+    state["pending_decision"] = None
+    state["last_seen_panels"] = panel_values
+    state["last_topology"] = topology_fingerprint(monitors)
+    save_state(state)
 
 
 def _record_pending(panel_values: list[str], monitors: list[Any]) -> None:
@@ -410,67 +429,6 @@ def cmd_watch(args: argparse.Namespace) -> int:
         if code != 0:
             return code
         time.sleep(args.interval)
-
-
-def _autostart_payload() -> dict[str, Any]:
-    path = autostart_path()
-    return _standard_payload(
-        ok=True,
-        severity="info",
-        summary="Legacy autostart watcher status collected",
-        messages=[f"legacy autostart watcher is {'installed' if path.exists() else 'not installed'}"],
-        error=None,
-        installed=path.exists(),
-        autostart_path=str(path),
-    )
-
-
-def cmd_autostart_status(args: argparse.Namespace) -> int:
-    payload = _autostart_payload()
-    if args.json:
-        _json(payload)
-    else:
-        print(f"{'installed' if payload['installed'] else 'not installed'}: {payload['autostart_path']}")
-    return 0
-
-
-def cmd_install_autostart(args: argparse.Namespace) -> int:
-    path = install_autostart()
-    if args.json:
-        _json(
-            _standard_payload(
-                ok=True,
-                severity="info",
-                summary="Legacy autostart watcher installed",
-                messages=[f"installed {path}"],
-                error=None,
-                installed=True,
-                autostart_path=str(path),
-            )
-        )
-        return 0
-    print(f"installed {path}")
-    return 0
-
-
-def cmd_uninstall_autostart(args: argparse.Namespace) -> int:
-    removed = uninstall_autostart()
-    if args.json:
-        _json(
-            _standard_payload(
-                ok=True,
-                severity="info",
-                summary="Legacy autostart watcher removed" if removed else "Legacy autostart watcher was not installed",
-                messages=[f"removed {autostart_path()}" if removed else f"not installed: {autostart_path()}"],
-                error=None,
-                installed=False,
-                removed=removed,
-                autostart_path=str(autostart_path()),
-            )
-        )
-        return 0
-    print(f"removed {autostart_path()}" if removed else f"not installed: {autostart_path()}")
-    return 0
 
 
 def cmd_diagnose(args: argparse.Namespace) -> int:
@@ -712,18 +670,6 @@ def build_parser() -> argparse.ArgumentParser:
     watch.add_argument("--interval", type=float, default=5.0)
     watch.set_defaults(func=cmd_watch)
 
-    autostart_status = sub.add_parser("autostart-status", help="show legacy XDG autostart watcher status")
-    autostart_status.add_argument("--json", action="store_true")
-    autostart_status.set_defaults(func=cmd_autostart_status)
-
-    install = sub.add_parser("install-autostart", help="install optional legacy XDG autostart watcher")
-    install.add_argument("--json", action="store_true")
-    install.set_defaults(func=cmd_install_autostart)
-
-    uninstall = sub.add_parser("uninstall-autostart", help="remove optional legacy XDG autostart watcher")
-    uninstall.add_argument("--json", action="store_true")
-    uninstall.set_defaults(func=cmd_uninstall_autostart)
-
     diagnose = sub.add_parser("diagnose", help="collect read-only diagnostics")
     diagnose.add_argument("--json", action="store_true")
     diagnose.set_defaults(func=cmd_diagnose)
@@ -771,8 +717,6 @@ MUTATING_COMMANDS = {
     "enable-applet",
     "disable-applet",
     "uninstall-applet",
-    "install-autostart",
-    "uninstall-autostart",
 }
 
 
